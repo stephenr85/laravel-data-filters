@@ -8,6 +8,9 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Rushing\DataFilters\ServiceProvider;
+use Rushing\DataFilters\Tests\Stubs\Gadget;
+use Rushing\DataFilters\Tests\Stubs\GadgetFilterData;
+use Rushing\DataFilters\Tests\Stubs\GadgetQuery;
 use Rushing\DataFilters\Tests\Stubs\WidgetFilterData;
 use Rushing\DataFilters\Tests\Stubs\WidgetQuery;
 use Rushing\DataFilters\Tests\Stubs\Widget;
@@ -45,6 +48,11 @@ abstract class TestCase extends Orchestra
                 'query' => WidgetQuery::class,
                 'model' => Widget::class,
             ],
+            'gadget' => [
+                'data' => GadgetFilterData::class,
+                'query' => GadgetQuery::class,
+                'model' => Gadget::class,
+            ],
         ]);
     }
 
@@ -54,6 +62,16 @@ abstract class TestCase extends Orchestra
             $table->id();
             $table->string('name');
             $table->string('color');
+            $table->timestamps();
+        });
+
+        Schema::create('gadgets', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('color');
+            $table->integer('weight')->default(0);
+            $table->string('status')->default('draft');
+            $table->boolean('flagged')->default(false);
             $table->timestamps();
         });
     }

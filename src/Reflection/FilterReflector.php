@@ -81,7 +81,11 @@ final class FilterReflector
             }
 
             $name = $attribute->name ?? Str::snake($property->getName());
-            $includes = array_merge($includes, AllowedInclude::relationship($name));
+            $relationship = AllowedInclude::relationship($name);
+
+            foreach (is_iterable($relationship) ? $relationship : [$relationship] as $include) {
+                $includes[] = $include;
+            }
         }
 
         return $includes;
