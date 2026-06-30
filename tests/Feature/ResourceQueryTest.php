@@ -31,3 +31,14 @@ it('returns every row when no filter is applied', function () {
 
     expect(DataFilter::query('widget')->apply($request)->get())->toHaveCount(3);
 });
+
+it('applies declared filters to a caller-provided base query', function () {
+    // A pre-constraint on the base is preserved; the declared filter is layered on.
+    $base = Widget::query()->where('name', '!=', 'Beta');
+    $request = Request::create('/', 'GET', ['filter' => ['color' => 'red']]);
+
+    $names = DataFilter::query('widget')->applyFiltersTo($base, $request)
+        ->get()->pluck('name')->sort()->values()->all();
+
+    expect($names)->toBe(['Alpha', 'Gamma']);
+});

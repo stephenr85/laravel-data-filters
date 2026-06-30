@@ -119,6 +119,22 @@ abstract class ResourceQuery
         return array_values(array_unique([...$declared, ...$extraNames]));
     }
 
+    /**
+     * Apply only the declared (and escape-hatch) filters to a caller-provided base
+     * query — no row-level auth scoping, no default sort. The seam for resolving a
+     * resource's boolean boundary somewhere other than the list endpoint (e.g. a
+     * retrieval policy's no-seed-query branch) while keeping one definition of how
+     * the resource filters.
+     */
+    public function applyFiltersTo(Builder $base, Request $request): QueryBuilder
+    {
+        return QueryBuilder::for($base, $request)
+            ->allowedFilters(...[
+                ...$this->reflector->allowedFilters($this->definition->data),
+                ...$this->extraFilters(),
+            ]);
+    }
+
     public function apply(Request $request): QueryBuilder
     {
         $data = $this->definition->data;
