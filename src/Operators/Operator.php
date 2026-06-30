@@ -99,8 +99,8 @@ abstract class Operator implements FilterOperator
         if ($this->options !== null) {
             return [
                 'optionsRef' => $this->options,
-                'valueKey' => 'id',
-                'labelKey' => 'name',
+                'valueKey' => 'value',
+                'labelKey' => 'label',
                 'searchable' => true,
             ];
         }

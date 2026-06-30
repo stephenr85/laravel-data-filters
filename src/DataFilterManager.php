@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Rushing\DataFilters;
 
+use Closure;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
+use Rushing\DataFilters\Options\OptionsRegistry;
+use Rushing\DataFilters\Options\OptionsSource;
 use Rushing\DataFilters\Query\ResourceQuery;
 use Rushing\DataFilters\Registry\ResourceDefinition;
 use Rushing\DataFilters\Registry\ResourceRegistry;
@@ -24,11 +27,36 @@ final class DataFilterManager
     public function __construct(
         private readonly ResourceRegistry $registry,
         private readonly Container $container,
+        private readonly OptionsRegistry $options,
     ) {}
 
     public function registry(): ResourceRegistry
     {
         return $this->registry;
+    }
+
+    /**
+     * Register a host Options Source for a relational filter's `optionsRef`
+     * (ADR-0006). The package owns no HTTP route; the host delivers the values.
+     *
+     * @param  OptionsSource|class-string<OptionsSource>|Closure  $source
+     */
+    public function options(string $key, OptionsSource|string|Closure $source): void
+    {
+        $this->options->register($key, $source);
+    }
+
+    public function hasOptions(string $key): bool
+    {
+        return $this->options->has($key);
+    }
+
+    /**
+     * @return list<array{value: mixed, label: string}>
+     */
+    public function resolveOptions(string $key, ?string $search = null): array
+    {
+        return $this->options->resolve($key, $search);
     }
 
     /**

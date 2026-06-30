@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Rushing\DataFilters;
 
+use Rushing\DataFilters\Options\OptionsRegistry;
 use Rushing\DataFilters\Registry\ResourceRegistry;
 use Rushing\DataFilters\Schema\FilterableAttributesStrategy;
 use Spatie\LaravelPackageTools\Package;
@@ -24,9 +25,12 @@ class ServiceProvider extends PackageServiceProvider
             config('data-filters.resources', [])
         ));
 
+        $this->app->singleton(OptionsRegistry::class, fn ($app) => new OptionsRegistry($app));
+
         $this->app->singleton(DataFilterManager::class, fn ($app) => new DataFilterManager(
             $app->make(ResourceRegistry::class),
             $app,
+            $app->make(OptionsRegistry::class),
         ));
     }
 
