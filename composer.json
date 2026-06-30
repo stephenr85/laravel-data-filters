@@ -21,14 +21,11 @@
     },
     "repositories": {
         "laravel-data-schemas": {
-            "type": "path",
-            "url": "../laravel-data-schemas",
-            "options": {
-                "symlink": true
-            }
+            "type": "git",
+            "url": "https://github.com/stephenr85/laravel-data-schemas.git"
         },
         "laravel-popcorn": {
-            "type": "vcs",
+            "type": "git",
             "url": "https://github.com/stephenr85/laravel-popcorn.git"
         }
     },
@@ -44,6 +41,9 @@
         }
     },
     "extra": {
+        "branch-alias": {
+            "dev-main": "1.0.x-dev"
+        },
         "laravel": {
             "providers": [
                 "Rushing\\DataFilters\\ServiceProvider"
