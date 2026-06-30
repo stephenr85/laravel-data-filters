@@ -17,7 +17,8 @@
     "require-dev": {
         "orchestra/testbench": "^10.0",
         "pestphp/pest": "^3.0",
-        "pestphp/pest-plugin-laravel": "^3.0"
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "laravel/pint": "^1.0"
     },
     "repositories": {
         "laravel-data-schemas": {
@@ -56,5 +57,8 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "scripts": {
+        "pint": "@php -d memory_limit=512M vendor/bin/pint"
+    }
 }
