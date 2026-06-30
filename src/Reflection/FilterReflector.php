@@ -92,6 +92,57 @@ final class FilterReflector
     }
 
     /**
+     * The declared filter keys (the `#[Filterable]` name override, else snake of the
+     * property). Used by saved-filter validation/pruning.
+     *
+     * @param  class-string  $dataClass
+     * @return list<string>
+     */
+    public function filterNames(string $dataClass): array
+    {
+        return $this->names($dataClass, Filterable::class);
+    }
+
+    /**
+     * @param  class-string  $dataClass
+     * @return list<string>
+     */
+    public function sortNames(string $dataClass): array
+    {
+        return $this->names($dataClass, Sortable::class);
+    }
+
+    /**
+     * @param  class-string  $dataClass
+     * @return list<string>
+     */
+    public function includeNames(string $dataClass): array
+    {
+        return $this->names($dataClass, Includable::class);
+    }
+
+    /**
+     * @param  class-string  $dataClass
+     * @param  class-string  $attribute
+     * @return list<string>
+     */
+    private function names(string $dataClass, string $attribute): array
+    {
+        $names = [];
+
+        foreach ($this->properties($dataClass) as $property) {
+            $declared = $this->attribute($property, $attribute);
+            if ($declared === null) {
+                continue;
+            }
+
+            $names[] = $declared->name ?? Str::snake($property->getName());
+        }
+
+        return $names;
+    }
+
+    /**
      * @param  class-string  $dataClass
      * @return list<ReflectionProperty>
      */

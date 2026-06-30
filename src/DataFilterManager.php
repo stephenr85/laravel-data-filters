@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace Rushing\DataFilters;
 
 use Illuminate\Contracts\Container\Container;
+use Illuminate\Http\Request;
 use Rushing\DataFilters\Query\ResourceQuery;
 use Rushing\DataFilters\Registry\ResourceDefinition;
 use Rushing\DataFilters\Registry\ResourceRegistry;
+use Rushing\DataFilters\SavedFilters\SavedFilter;
+use Rushing\DataFilters\SavedFilters\SavedFilterValidator;
+use Spatie\QueryBuilder\QueryBuilder;
 
 /**
  * The façade target. Owns the Resource Registry and resolves a resource key to a
@@ -52,5 +56,38 @@ final class DataFilterManager
         return $this->container->make($definition->query, [
             'definition' => $definition,
         ]);
+    }
+
+    /**
+     * Apply a saved filter: prune its stored params against the *current* resource
+     * (ADR-0007), rebuild the equivalent request, and return the same QueryBuilder a
+     * client would get by passing those params inline.
+     */
+    public function applySaved(SavedFilter $filter): QueryBuilder
+    {
+        $params = $this->container->make(SavedFilterValidator::class)
+            ->prune($filter->resource, $filter->query_parameters ?? []);
+
+        return $this->query($filter->resource)->apply($this->requestFromParams($params));
+    }
+
+    /**
+     * @param  array<string, mixed>  $params
+     */
+    private function requestFromParams(array $params): Request
+    {
+        $query = [];
+
+        if (! empty($params['filter'])) {
+            $query['filter'] = $params['filter'];
+        }
+        if (! empty($params['sort'])) {
+            $query['sort'] = is_array($params['sort']) ? implode(',', $params['sort']) : $params['sort'];
+        }
+        if (! empty($params['include'])) {
+            $query['include'] = is_array($params['include']) ? implode(',', $params['include']) : $params['include'];
+        }
+
+        return Request::create('/', 'GET', $query);
     }
 }

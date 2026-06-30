@@ -74,5 +74,17 @@ abstract class TestCase extends Orchestra
             $table->boolean('flagged')->default(false);
             $table->timestamps();
         });
+
+        Schema::create('saved_filters', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('name');
+            $table->string('resource');
+            $table->json('query_parameters');
+            $table->nullableUuidMorphs('owner');
+            $table->string('visibility')->default('private');
+            $table->nullableUuidMorphs('context');
+            $table->boolean('is_default')->default(false);
+            $table->timestamps();
+        });
     }
 }

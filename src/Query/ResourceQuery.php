@@ -68,6 +68,57 @@ abstract class ResourceQuery
         return [];
     }
 
+    /**
+     * The full set of allowed filter keys — declared attributes plus the escape-hatch
+     * `extraFilters()`. Used by saved-filter validation and pruning.
+     *
+     * @return list<string>
+     */
+    public function filterNames(): array
+    {
+        return $this->mergedNames(
+            $this->reflector->filterNames($this->definition->data),
+            $this->extraFilters(),
+        );
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function sortNames(): array
+    {
+        return $this->mergedNames(
+            $this->reflector->sortNames($this->definition->data),
+            $this->extraSorts(),
+        );
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function includeNames(): array
+    {
+        return $this->mergedNames(
+            $this->reflector->includeNames($this->definition->data),
+            $this->extraIncludes(),
+        );
+    }
+
+    /**
+     * @param  list<string>  $declared
+     * @param  list<object|string>  $extra
+     * @return list<string>
+     */
+    private function mergedNames(array $declared, array $extra): array
+    {
+        $extraNames = array_map(
+            fn ($entry) => is_string($entry) ? $entry : $entry->getName(),
+            $extra,
+        );
+
+        return array_values(array_unique([...$declared, ...$extraNames]));
+    }
+
     public function apply(Request $request): QueryBuilder
     {
         $data = $this->definition->data;
