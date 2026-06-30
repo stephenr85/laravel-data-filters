@@ -1,0 +1,58 @@
+{
+    "name": "rushing/laravel-data-filters",
+    "description": "Host-agnostic filtering spine for Laravel. Declare a resource's filterable surface once on a Spatie Data class; derive a spatie/laravel-query-builder query, an x-filter JSON-Schema keyword for UI parity (via laravel-data-schemas), and persisted saved filters from that single declaration.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.3",
+        "illuminate/contracts": "^12.0",
+        "illuminate/support": "^12.0",
+        "rushing/laravel-data-schemas": "dev-main",
+        "spatie/laravel-data": "^4.0",
+        "spatie/laravel-package-tools": "^1.16",
+        "spatie/laravel-query-builder": "^7.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^10.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0"
+    },
+    "repositories": {
+        "laravel-data-schemas": {
+            "type": "path",
+            "url": "../laravel-data-schemas",
+            "options": {
+                "symlink": true
+            }
+        },
+        "laravel-popcorn": {
+            "type": "vcs",
+            "url": "https://github.com/stephenr85/laravel-popcorn.git"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Rushing\\DataFilters\\": "src/",
+            "Rushing\\DataFilters\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Rushing\\DataFilters\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Rushing\\DataFilters\\ServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
