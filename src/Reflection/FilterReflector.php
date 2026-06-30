@@ -10,6 +10,7 @@ use ReflectionProperty;
 use Rushing\DataFilters\Attributes\Filterable;
 use Rushing\DataFilters\Attributes\Includable;
 use Rushing\DataFilters\Attributes\Sortable;
+use Rushing\DataFilters\Schema\FilterableAttributesStrategy;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedInclude;
 use Spatie\QueryBuilder\AllowedSort;
@@ -17,7 +18,7 @@ use Spatie\QueryBuilder\AllowedSort;
 /**
  * Reflects a Filter Data class's declared surface into the spatie/laravel-query-builder
  * allowed-sets. The same `#[Filterable]` attributes this reads are projected to
- * `x-filter` keywords by {@see \Rushing\DataFilters\Schema\FilterableAttributesStrategy};
+ * `x-filter` keywords by {@see FilterableAttributesStrategy};
  * one declaration site, two derived artifacts (ADR-0001).
  */
 final class FilterReflector
@@ -101,6 +102,32 @@ final class FilterReflector
     public function filterNames(string $dataClass): array
     {
         return $this->names($dataClass, Filterable::class);
+    }
+
+    /**
+     * Map each declared filter key to its backing Data property — the bridge for
+     * hydrating/casting a saved filter's values, since a filter key (the
+     * `#[Filterable]` name override) is not always the property name (ADR-0002,
+     * e.g. `tags:all` ↔ `allTags`).
+     *
+     * @param  class-string  $dataClass
+     * @return array<string, ReflectionProperty>
+     */
+    public function filterProperties(string $dataClass): array
+    {
+        $map = [];
+
+        foreach ($this->properties($dataClass) as $property) {
+            $attribute = $this->attribute($property, Filterable::class);
+            if ($attribute === null) {
+                continue;
+            }
+
+            $name = $attribute->name ?? Str::snake($property->getName());
+            $map[$name] = $property;
+        }
+
+        return $map;
     }
 
     /**

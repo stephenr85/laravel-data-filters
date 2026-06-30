@@ -21,7 +21,7 @@ abstract class Operator implements FilterOperator
 {
     /**
      * @param  string|null  $options  a relational Options Source key (ADR-0006); finite
-     *                                 domains (backed enums, bools) inline instead.
+     *                                domains (backed enums, bools) inline instead.
      */
     public function __construct(
         public readonly ?string $options = null,

@@ -6,9 +6,9 @@ namespace Rushing\DataFilters\Facades;
 
 use Illuminate\Support\Facades\Facade;
 use Rushing\DataFilters\DataFilterManager;
+use Rushing\DataFilters\Query\ResourceQuery;
 use Rushing\DataFilters\Registry\ResourceDefinition;
 use Rushing\DataFilters\Registry\ResourceRegistry;
-use Rushing\DataFilters\Query\ResourceQuery;
 
 /**
  * @method static ResourceRegistry registry()

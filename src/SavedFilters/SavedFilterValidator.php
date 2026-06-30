@@ -6,6 +6,7 @@ namespace Rushing\DataFilters\SavedFilters;
 
 use Illuminate\Validation\ValidationException;
 use Rushing\DataFilters\DataFilterManager;
+use Rushing\DataFilters\Query\ResourceQuery;
 
 /**
  * Validate-on-save, tolerate-on-read (ADR-0007). On save, every filter/sort/include
@@ -21,6 +22,7 @@ final class SavedFilterValidator
 {
     public function __construct(
         private readonly DataFilterManager $manager,
+        private readonly FilterValueCaster $caster = new FilterValueCaster,
     ) {}
 
     /**
@@ -57,11 +59,51 @@ final class SavedFilterValidator
             $errors['query_parameters.limit'][] = 'The limit must be numeric.';
         }
 
+        [$filters, $castErrors] = $this->castFilters($query, $params['filter'] ?? []);
+        $errors += $castErrors;
+
         if ($errors !== []) {
             throw ValidationException::withMessages($errors);
         }
 
+        if (isset($params['filter'])) {
+            $params['filter'] = $filters;
+        }
+
         return $params;
+    }
+
+    /**
+     * Hydrate each declared filter value through its backing Data property's type,
+     * casting it to canonical form (ADR-0007). Keys backed by a closure escape-hatch
+     * (no Data property) and unknown keys (already flagged above) pass through
+     * untouched; a value that can't be coerced to its declared type is collected as a
+     * 422 error rather than persisted raw.
+     *
+     * @return array{0: array<string, mixed>, 1: array<string, list<string>>}
+     */
+    private function castFilters(ResourceQuery $query, mixed $filter): array
+    {
+        if (! is_array($filter)) {
+            return [[], []];
+        }
+
+        $properties = $query->filterProperties();
+        $errors = [];
+
+        foreach ($filter as $key => $value) {
+            if (! isset($properties[$key])) {
+                continue;
+            }
+
+            try {
+                $filter[$key] = $this->caster->cast($properties[$key], $value);
+            } catch (InvalidFilterValue $e) {
+                $errors["query_parameters.filter.{$key}"][] = "Filter [{$key}] {$e->getMessage()}.";
+            }
+        }
+
+        return [$filter, $errors];
     }
 
     /**

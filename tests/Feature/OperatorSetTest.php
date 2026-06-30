@@ -3,12 +3,14 @@
 declare(strict_types=1);
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Rushing\DataFilters\Facades\DataFilter;
 use Rushing\DataFilters\Reflection\FilterReflector;
 use Rushing\DataFilters\Tests\Stubs\Gadget;
 use Rushing\DataFilters\Tests\Stubs\GadgetFilterData;
+use Rushing\DataFilters\Tests\Stubs\ShoutFilterData;
 
-function gadgetResults(array $query): \Illuminate\Support\Collection
+function gadgetResults(array $query): Collection
 {
     $request = Request::create('/gadgets', 'GET', $query);
 
@@ -61,7 +63,7 @@ it('reflects a declared include into an allowed include', function () {
 });
 
 it('picks up a host-defined operator without editing package internals', function () {
-    $filters = (new FilterReflector)->allowedFilters(\Rushing\DataFilters\Tests\Stubs\ShoutFilterData::class);
+    $filters = (new FilterReflector)->allowedFilters(ShoutFilterData::class);
 
     expect($filters)->toHaveCount(1)
         ->and($filters[0]->getName())->toBe('code');

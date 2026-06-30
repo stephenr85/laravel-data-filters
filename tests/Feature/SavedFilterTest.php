@@ -50,6 +50,31 @@ it('rejects an unknown sort on save', function () {
         ->toThrow(ValidationException::class);
 });
 
+it('rejects a wrong-typed value for a declared filter on save', function () {
+    expect(fn () => savedFilterValidator()->validate('gadget', ['filter' => ['weight' => 'heavy']]))
+        ->toThrow(ValidationException::class);
+
+    expect(fn () => savedFilterValidator()->validate('gadget', ['filter' => ['flagged' => 'maybe']]))
+        ->toThrow(ValidationException::class);
+
+    expect(fn () => savedFilterValidator()->validate('gadget', ['filter' => ['status' => 'bogus']]))
+        ->toThrow(ValidationException::class);
+});
+
+it('casts declared filter values to canonical form on save', function () {
+    $params = savedFilterValidator()->validate('gadget', [
+        'filter' => [
+            'weight' => '42',
+            'flagged' => '1',
+            'status' => 'active',
+        ],
+    ]);
+
+    expect($params['filter']['weight'])->toBe(42)
+        ->and($params['filter']['flagged'])->toBe(true)
+        ->and($params['filter']['status'])->toBe('active');
+});
+
 it('silently prunes a key the resource no longer allows on read', function () {
     $pruned = savedFilterValidator()->prune('widget', [
         'filter' => ['color' => 'red', 'bogus' => 'x'],

@@ -8,6 +8,9 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Rushing\DataFilters\Reflection\FilterReflector;
 use Rushing\DataFilters\Registry\ResourceDefinition;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedInclude;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 /**
@@ -45,7 +48,7 @@ abstract class ResourceQuery
      * Imperative filters that don't map to a declared property (closures, custom
      * scopes built at runtime).
      *
-     * @return list<\Spatie\QueryBuilder\AllowedFilter>
+     * @return list<AllowedFilter>
      */
     protected function extraFilters(): array
     {
@@ -53,7 +56,7 @@ abstract class ResourceQuery
     }
 
     /**
-     * @return list<\Spatie\QueryBuilder\AllowedSort|string>
+     * @return list<AllowedSort|string>
      */
     protected function extraSorts(): array
     {
@@ -61,7 +64,7 @@ abstract class ResourceQuery
     }
 
     /**
-     * @return list<\Spatie\QueryBuilder\AllowedInclude|string>
+     * @return list<AllowedInclude|string>
      */
     protected function extraIncludes(): array
     {
@@ -80,6 +83,18 @@ abstract class ResourceQuery
             $this->reflector->filterNames($this->definition->data),
             $this->extraFilters(),
         );
+    }
+
+    /**
+     * The declared filter key → backing Data property map (escape-hatch closure
+     * filters have no Data property and are absent). The bridge saved-filter casting
+     * uses to type a stored value against its declaration.
+     *
+     * @return array<string, \ReflectionProperty>
+     */
+    public function filterProperties(): array
+    {
+        return $this->reflector->filterProperties($this->definition->data);
     }
 
     /**
