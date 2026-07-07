@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\SavedFilters;
 
 use BackedEnum;
@@ -19,7 +17,7 @@ use Spatie\LaravelData\Optional;
  * A value that can't be coerced throws {@see InvalidFilterValue}, which the validator
  * turns into a 422.
  */
-final class FilterValueCaster
+class FilterValueCaster
 {
     /**
      * @throws InvalidFilterValue

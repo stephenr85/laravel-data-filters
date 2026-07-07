@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Registry;
 
 use InvalidArgumentException;
@@ -12,7 +10,7 @@ use InvalidArgumentException;
  * `DataFilter` facade. A stable string key is how list endpoints, saved filters,
  * and the schema strategy all resolve the same resource.
  */
-final class ResourceRegistry
+class ResourceRegistry
 {
     /** @var array<string, ResourceDefinition> */
     private array $resources = [];

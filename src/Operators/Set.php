@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Operators;
 
 use Illuminate\Support\Arr;
@@ -13,7 +11,7 @@ use Spatie\QueryBuilder\AllowedFilter;
  * Renders as a multi-select; a finite domain (backed enum / bool) inlines its
  * options, a relational column references an Options Source.
  */
-final class Set extends Operator
+class Set extends Operator
 {
     protected function operatorName(): string
     {

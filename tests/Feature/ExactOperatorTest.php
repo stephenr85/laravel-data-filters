@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 use Rushing\DataFilters\Operators\Exact;
 use Rushing\DataFilters\Tests\Stubs\WidgetFilterData;
 use Spatie\QueryBuilder\AllowedFilter;

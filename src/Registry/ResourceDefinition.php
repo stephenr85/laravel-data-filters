@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Registry;
 
 /**
@@ -9,7 +7,7 @@ namespace Rushing\DataFilters\Registry;
  * Query class (escape hatch + model binding), and the Eloquent model. Bound classes
  * self-describe; this is the value the Resource Registry resolves a key to.
  */
-final class ResourceDefinition
+class ResourceDefinition
 {
     /**
      * @param  class-string  $data
@@ -17,10 +15,10 @@ final class ResourceDefinition
      * @param  class-string  $model
      */
     public function __construct(
-        public readonly string $key,
-        public readonly string $data,
-        public readonly string $query,
-        public readonly string $model,
+        public string $key,
+        public string $data,
+        public string $query,
+        public string $model,
     ) {}
 
     /**

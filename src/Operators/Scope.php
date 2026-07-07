@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Operators;
 
 use ReflectionProperty;
@@ -14,11 +12,11 @@ use Spatie\QueryBuilder\AllowedFilter;
  * model's `scopeProducedByCircuit`. The control defaults to text; a host can
  * refine it by subclassing.
  */
-final class Scope extends Operator
+class Scope extends Operator
 {
     public function __construct(
-        public readonly string $scope,
-        public readonly string $control = 'text',
+        public string $scope,
+        public string $control = 'text',
     ) {
         parent::__construct();
     }

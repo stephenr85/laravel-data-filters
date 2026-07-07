@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Operators;
 
 use BackedEnum;
@@ -24,7 +22,7 @@ abstract class Operator implements FilterOperator
      *                                domains (backed enums, bools) inline instead.
      */
     public function __construct(
-        public readonly ?string $options = null,
+        public ?string $options = null,
     ) {}
 
     abstract protected function operatorName(): string;

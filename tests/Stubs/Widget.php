@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Tests\Stubs;
 
 use Illuminate\Database\Eloquent\Model;

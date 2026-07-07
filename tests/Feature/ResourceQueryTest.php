@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 use Illuminate\Http\Request;
 use Rushing\DataFilters\Facades\DataFilter;
 use Rushing\DataFilters\Query\ResourceQuery;

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Options;
 
 use Closure;
@@ -14,13 +12,13 @@ use InvalidArgumentException;
  * or a closure `fn (?string $search): array`. Resolution is lazy so a host can
  * register a class without booting it until options are actually requested.
  */
-final class OptionsRegistry
+class OptionsRegistry
 {
     /** @var array<string, OptionsSource|class-string<OptionsSource>|Closure> */
     private array $sources = [];
 
     public function __construct(
-        private readonly Container $container,
+        private Container $container,
     ) {}
 
     /**

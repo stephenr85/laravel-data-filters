@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Operators;
 
 use DateTimeInterface;
@@ -15,7 +13,7 @@ use Spatie\QueryBuilder\AllowedFilter;
  * `WHERE created_at >= '2026-01-01'`. The control refines by the property's type:
  * a date type → `date-range`, a numeric type → `number-range`.
  */
-final class Range extends Operator
+class Range extends Operator
 {
     protected function operatorName(): string
     {

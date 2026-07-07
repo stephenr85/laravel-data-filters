@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Operators;
 
 use ReflectionProperty;
@@ -15,13 +13,13 @@ use Spatie\QueryBuilder\AllowedFilter;
  * 'body'])]`). A host with a real search engine (Scout, tsvector) implements its
  * own operator instead.
  */
-final class Search extends Operator
+class Search extends Operator
 {
     /**
      * @param  list<string>  $columns
      */
     public function __construct(
-        public readonly array $columns = [],
+        public array $columns = [],
     ) {
         parent::__construct();
     }

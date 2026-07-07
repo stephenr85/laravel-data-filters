@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\SavedFilters;
 
 use Illuminate\Validation\ValidationException;
@@ -18,11 +16,11 @@ use Rushing\DataFilters\Query\ResourceQuery;
  * resource evolution never breaks a stored filter — Spatie's allowed-set remains the
  * final gate at apply.
  */
-final class SavedFilterValidator
+class SavedFilterValidator
 {
     public function __construct(
-        private readonly DataFilterManager $manager,
-        private readonly FilterValueCaster $caster = new FilterValueCaster,
+        private DataFilterManager $manager,
+        private FilterValueCaster $caster = new FilterValueCaster,
     ) {}
 
     /**

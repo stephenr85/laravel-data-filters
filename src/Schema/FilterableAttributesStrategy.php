@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Schema;
 
 use Illuminate\Support\Str;
@@ -19,7 +17,7 @@ use Rushing\LaravelDataSchemas\Strategies\SchemaStrategyContext;
  * package service provider; contributes nothing to a property without these
  * attributes. Like every `x-*` keyword these are stripped by `forLlmStrict`.
  */
-final class FilterableAttributesStrategy implements SchemaStrategy
+class FilterableAttributesStrategy implements SchemaStrategy
 {
     public function apply(ReflectionProperty $property, array $schema, SchemaStrategyContext $context): array
     {

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\SavedFilters;
 
 use InvalidArgumentException;
@@ -11,7 +9,7 @@ use InvalidArgumentException;
  * Thrown by {@see FilterValueCaster}; the validator catches it per-key and turns it
  * into a 422 (ADR-0007).
  */
-final class InvalidFilterValue extends InvalidArgumentException
+class InvalidFilterValue extends InvalidArgumentException
 {
     public static function for(string $expected): self
     {

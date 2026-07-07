@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 use Rushing\DataFilters\Schema\FilterableAttributesStrategy;
 use Rushing\DataFilters\Tests\Stubs\GadgetFilterData;
 use Rushing\DataFilters\Tests\Stubs\ShoutFilterData;

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Operators;
 
 use ReflectionProperty;
@@ -13,7 +11,7 @@ use Spatie\QueryBuilder\AllowedFilter;
  * relational column references an Options Source; anything else is a plain text
  * control.
  */
-final class Exact extends Operator
+class Exact extends Operator
 {
     protected function operatorName(): string
     {

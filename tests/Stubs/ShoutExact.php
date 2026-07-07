@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Tests\Stubs;
 
 use ReflectionProperty;
@@ -13,7 +11,7 @@ use Spatie\QueryBuilder\AllowedFilter;
  * package base) — proving open-core: a host adds an operator without editing any
  * package internals or a central enum.
  */
-final class ShoutExact implements FilterOperator
+class ShoutExact implements FilterOperator
 {
     public function toAllowedFilter(string $name): AllowedFilter
     {

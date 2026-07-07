@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Reflection;
 
 use Illuminate\Support\Str;
@@ -21,7 +19,7 @@ use Spatie\QueryBuilder\AllowedSort;
  * `x-filter` keywords by {@see FilterableAttributesStrategy};
  * one declaration site, two derived artifacts (ADR-0001).
  */
-final class FilterReflector
+class FilterReflector
 {
     /**
      * @param  class-string  $dataClass

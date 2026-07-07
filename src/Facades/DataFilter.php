@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Facades;
 
 use Illuminate\Support\Facades\Facade;
@@ -20,7 +18,7 @@ use Rushing\DataFilters\Registry\ResourceRegistry;
  *
  * @see DataFilterManager
  */
-final class DataFilter extends Facade
+class DataFilter extends Facade
 {
     protected static function getFacadeAccessor(): string
     {

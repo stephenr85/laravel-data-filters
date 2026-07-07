@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\SavedFilters;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;

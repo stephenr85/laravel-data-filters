@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 it('names no host domain types anywhere in src', function () {
     $files = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator(dirname(__DIR__, 2).'/src', FilesystemIterator::SKIP_DOTS)

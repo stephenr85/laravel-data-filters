@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters;
 
 use Closure;
@@ -22,12 +20,12 @@ use Spatie\QueryBuilder\QueryBuilder;
  * registration isn't enough; otherwise the registry is seeded from
  * `config('data-filters.resources')`.
  */
-final class DataFilterManager
+class DataFilterManager
 {
     public function __construct(
-        private readonly ResourceRegistry $registry,
-        private readonly Container $container,
-        private readonly OptionsRegistry $options,
+        private ResourceRegistry $registry,
+        private Container $container,
+        private OptionsRegistry $options,
     ) {}
 
     public function registry(): ResourceRegistry

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Attributes;
 
 use Attribute;
@@ -16,7 +14,7 @@ use Attribute;
  *   #[Includable(name: 'lineage')] // include name override
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-final class Includable
+class Includable
 {
     public function __construct(
         public ?string $name = null,

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Attributes;
 
 use Attribute;
@@ -23,7 +21,7 @@ use Rushing\DataFilters\Contracts\FilterOperator;
  * output field (ADR-0002).
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-final class Filterable
+class Filterable
 {
     /**
      * @param  class-string<FilterOperator>  $operator

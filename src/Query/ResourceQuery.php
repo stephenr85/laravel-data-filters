@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Query;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -26,8 +24,8 @@ use Spatie\QueryBuilder\QueryBuilder;
 abstract class ResourceQuery
 {
     public function __construct(
-        protected readonly ResourceDefinition $definition,
-        protected readonly FilterReflector $reflector,
+        protected ResourceDefinition $definition,
+        protected FilterReflector $reflector,
     ) {}
 
     /**

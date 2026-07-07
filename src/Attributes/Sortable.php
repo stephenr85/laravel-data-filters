@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Attributes;
 
 use Attribute;
@@ -17,7 +15,7 @@ use Attribute;
  *   #[Sortable(column: 'created_at')] // sort key = property, ORDER BY column
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-final class Sortable
+class Sortable
 {
     public function __construct(
         public ?string $name = null,
