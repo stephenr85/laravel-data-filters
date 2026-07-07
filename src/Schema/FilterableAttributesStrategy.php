@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use ReflectionProperty;
 use Rushing\DataFilters\Attributes\Filterable;
 use Rushing\DataFilters\Attributes\Sortable;
+use Rushing\DataFilters\Keywords;
 use Rushing\LaravelDataSchemas\Strategies\SchemaStrategy;
 use Rushing\LaravelDataSchemas\Strategies\SchemaStrategyContext;
 
@@ -23,12 +24,12 @@ class FilterableAttributesStrategy implements SchemaStrategy
     {
         if ($filterable = $this->firstAttribute($property, Filterable::class)) {
             $name = $filterable->name ?? Str::snake($property->getName());
-            $schema['x-filter'] = $filterable->operator()->keyword($property, $name);
+            $schema[Keywords::Filter] = $filterable->operator()->keyword($property, $name);
         }
 
         if ($sortable = $this->firstAttribute($property, Sortable::class)) {
             $name = $sortable->name ?? Str::snake($property->getName());
-            $schema['x-sort'] = ['name' => $name];
+            $schema[Keywords::Sort] = ['name' => $name];
         }
 
         return $schema;
