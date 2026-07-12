@@ -3,7 +3,7 @@
 use Rushing\DataFilters\Schema\FilterableAttributesStrategy;
 use Rushing\DataFilters\Tests\Stubs\GadgetFilterData;
 use Rushing\DataFilters\Tests\Stubs\ShoutFilterData;
-use Rushing\LaravelDataSchemas\Generators\JsonSchemaGenerator;
+use Schemastud\DataSchemas\Generators\JsonSchemaGenerator;
 
 function gadgetProps(): array
 {

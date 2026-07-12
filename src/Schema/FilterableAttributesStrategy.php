@@ -7,8 +7,8 @@ use ReflectionProperty;
 use Rushing\DataFilters\Attributes\Filterable;
 use Rushing\DataFilters\Attributes\Sortable;
 use Rushing\DataFilters\Keywords;
-use Rushing\LaravelDataSchemas\Strategies\SchemaStrategy;
-use Rushing\LaravelDataSchemas\Strategies\SchemaStrategyContext;
+use Schemastud\DataSchemas\Strategies\SchemaStrategy;
+use Schemastud\DataSchemas\Strategies\SchemaStrategyContext;
 
 /**
  * Projects `#[Filterable]` and `#[Sortable]` on a Filter Data class property to the

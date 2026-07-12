@@ -4,7 +4,7 @@ use Rushing\DataFilters\Facades\DataFilter;
 use Rushing\DataFilters\Schema\FilterableAttributesStrategy;
 use Rushing\DataFilters\Tests\Stubs\ColorOptionsSource;
 use Rushing\DataFilters\Tests\Stubs\RelationalFilterData;
-use Rushing\LaravelDataSchemas\Generators\JsonSchemaGenerator;
+use Schemastud\DataSchemas\Generators\JsonSchemaGenerator;
 
 it('resolves a closure options source', function () {
     DataFilter::options('colors', fn (?string $search = null) => [

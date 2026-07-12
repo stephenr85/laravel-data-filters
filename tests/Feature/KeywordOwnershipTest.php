@@ -3,7 +3,7 @@
 use Rushing\DataFilters\Keywords;
 use Rushing\DataFilters\Schema\FilterableAttributesStrategy;
 use Rushing\DataFilters\Tests\Stubs\GadgetFilterData;
-use Rushing\LaravelDataSchemas\Generators\JsonSchemaGenerator;
+use Schemastud\DataSchemas\Generators\JsonSchemaGenerator;
 
 /**
  * Ownership guard (JSON-LD `@context` model): this package may only EMIT `x-` extension

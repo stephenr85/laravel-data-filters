@@ -12,7 +12,7 @@ use Rushing\DataFilters\Tests\Stubs\GadgetQuery;
 use Rushing\DataFilters\Tests\Stubs\Widget;
 use Rushing\DataFilters\Tests\Stubs\WidgetFilterData;
 use Rushing\DataFilters\Tests\Stubs\WidgetQuery;
-use Rushing\LaravelDataSchemas\LaravelDataSchemasServiceProvider;
+use Schemastud\DataSchemas\LaravelDataSchemasServiceProvider;
 use Spatie\LaravelData\LaravelDataServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
 

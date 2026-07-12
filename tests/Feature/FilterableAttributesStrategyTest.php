@@ -2,7 +2,7 @@
 
 use Rushing\DataFilters\Schema\FilterableAttributesStrategy;
 use Rushing\DataFilters\Tests\Stubs\WidgetFilterData;
-use Rushing\LaravelDataSchemas\Generators\JsonSchemaGenerator;
+use Schemastud\DataSchemas\Generators\JsonSchemaGenerator;
 
 function widgetSchema(bool $strict = false): array
 {
