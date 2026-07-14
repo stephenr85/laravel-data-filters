@@ -72,7 +72,8 @@ class AssetFilterData extends Data
 ```
 
 Shipped operators: `Exact`, `Partial` (LIKE), `Range` (`{min,max}`), `Set` (whereIn),
-`Search` (LIKE across columns), `Scope` (binds an Eloquent scope). When attributes can't
+`Search` (LIKE across columns), `Scope` (binds an Eloquent scope — pass `options:` to
+back a relational scope with a type-ahead Options Source, ADR-0006). When attributes can't
 express a predicate, drop it to the Query class (below).
 
 A filter key defaults to the snake-cased property name; pass `name:` to override it

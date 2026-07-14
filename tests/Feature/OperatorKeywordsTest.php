@@ -19,7 +19,28 @@ it('emits the correct x-filter operator per property', function () {
         ->and($props['weight']['x-filter']['operator'])->toBe('range')
         ->and($props['status']['x-filter']['operator'])->toBe('set')
         ->and($props['search']['x-filter']['operator'])->toBe('search')
-        ->and($props['flagged']['x-filter']['operator'])->toBe('scope');
+        ->and($props['flagged']['x-filter']['operator'])->toBe('scope')
+        ->and($props['ownedBy']['x-filter']['operator'])->toBe('scope');
+});
+
+it('references an Options Source when a scope filter declares one', function () {
+    $owned = gadgetProps()['ownedBy']['x-filter'];
+
+    expect($owned)->toMatchArray([
+        'operator' => 'scope',
+        'control' => 'select',
+        'optionsRef' => 'owners',
+        'valueKey' => 'value',
+        'labelKey' => 'label',
+        'searchable' => true,
+    ]);
+});
+
+it('keeps a plain scope filter as a text control with no options ref', function () {
+    $flagged = gadgetProps()['flagged']['x-filter'];
+
+    expect($flagged['control'])->toBe('text')
+        ->and($flagged)->not->toHaveKey('optionsRef');
 });
 
 it('refines the control by the property type', function () {
@@ -46,7 +67,7 @@ it('yields the complete keyword set for a mixed filter data class', function () 
 
     $filterable = collect($props)->filter(fn ($p) => isset($p['x-filter']))->keys()->all();
 
-    expect($filterable)->toBe(['color', 'name', 'weight', 'status', 'search', 'flagged']);
+    expect($filterable)->toBe(['color', 'name', 'weight', 'status', 'search', 'flagged', 'ownedBy']);
 });
 
 it('emits a host operators x-filter keyword from the schema strategy', function () {

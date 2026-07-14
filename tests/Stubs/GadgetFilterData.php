@@ -38,6 +38,9 @@ class GadgetFilterData extends Data
         #[Filterable(Scope::class, scope: 'flagged')]
         public ?bool $flagged = null,
 
+        #[Filterable(Scope::class, scope: 'ownedBy', options: 'owners')]
+        public ?string $ownedBy = null,
+
         #[Sortable]
         public ?string $createdAt = null,
 

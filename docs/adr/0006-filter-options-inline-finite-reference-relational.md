@@ -33,3 +33,14 @@ The package stays route-agnostic and ships no endpoint; the frontend follows the
 `optionsRef` to a host-owned source with typeahead. Trade-off accepted: the host
 wires each relational options source by hand, in exchange for keeping dynamic data
 out of the schema file and the package free of any owned HTTP surface.
+
+### Scope-bound relational filters
+
+The reference path is not exclusive to column comparisons. A `Scope` filter whose
+scope takes a relational id (`scopeProducedByCircuit(string $circuitId)`) declares
+the same `options:` key —
+`#[Filterable(Scope::class, scope: 'producedByCircuit', options: 'circuits')]`. An
+options-backed scope defaults its control to `select` (a single relational id) and
+emits the same `optionsRef`/`valueKey`/`labelKey`/`searchable` keyword, so the
+frontend renders it as a type-ahead identical to a relational `Set` — no per-filter
+control code. A scope with no `options` stays a plain `text` control as before.
