@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Operators;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -26,7 +24,7 @@ class KeywordFilter extends Operator
      * @param  class-string  $model
      */
     public function __construct(
-        public readonly string $model,
+        public string $model,
     ) {
         parent::__construct();
     }

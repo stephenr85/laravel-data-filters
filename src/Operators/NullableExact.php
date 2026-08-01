@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Rushing\DataFilters\Operators;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -20,7 +18,7 @@ use Spatie\QueryBuilder\AllowedFilter;
 class NullableExact extends Operator
 {
     public function __construct(
-        public readonly ?string $column = null,
+        public ?string $column = null,
         ?string $options = null,
     ) {
         parent::__construct($options);
