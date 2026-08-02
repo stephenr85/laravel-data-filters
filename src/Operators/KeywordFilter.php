@@ -12,7 +12,7 @@ use Spatie\QueryBuilder\AllowedFilter;
  * and preserve the relevance ordering (`orderByValues`). The searchable model is
  * declared on the attribute (`#[Filterable(KeywordFilter::class, model: Fragment::class)]`).
  *
- * Extracted DOWN from the host (`App\Data\Filters\Operators\KeywordFilter`) into this
+ * Extracted DOWN from the host (`Splicewire\Tower\Data\Filters\Operators\KeywordFilter`) into this
  * foundation so both the host's other filter DTOs and the beam-taxonomy cone can reach it
  * without an up-edge (tower-api-dissolution issue 17 P2). The searchable model is passed by
  * class-string, so this operator carries no dependency on any concrete model. The old FQCN is

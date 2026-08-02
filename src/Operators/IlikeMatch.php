@@ -12,7 +12,7 @@ use Spatie\QueryBuilder\AllowedFilter;
  * fallback). Column defaults to the filter key; override it to point a virtual key
  * (e.g. `keywords`) at a real column (e.g. `name`).
  *
- * Extracted DOWN from the host (`App\Data\Filters\Operators\IlikeMatch`) into this
+ * Extracted DOWN from the host (`Splicewire\Tower\Data\Filters\Operators\IlikeMatch`) into this
  * foundation so both the host's other filter DTOs and the beam-taxonomy cone can reach it
  * without an up-edge (tower-api-dissolution issue 17 P2). The old FQCN is kept resolving via
  * a back-compat `class_alias` in the host until every call site migrates.

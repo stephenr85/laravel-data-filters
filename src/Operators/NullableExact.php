@@ -11,7 +11,7 @@ use Spatie\QueryBuilder\AllowedFilter;
  * behaviour (empty `filter[parentId]` selects root silos). Column defaults to the
  * filter key; pass `column` to target a renamed column (e.g. `parent_id`).
  *
- * Extracted DOWN from the host (`App\Data\Filters\Operators\NullableExact`) into this
+ * Extracted DOWN from the host (`Splicewire\Tower\Data\Filters\Operators\NullableExact`) into this
  * foundation with the beam-taxonomy Silo cone (tower-api-dissolution issue 17 P2). The old FQCN
  * is kept resolving via a back-compat subclass shim in the host.
  */
