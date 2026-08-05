@@ -138,6 +138,29 @@ class FilterReflector
     }
 
     /**
+     * The DTO-declared default sort — the sort key of the first `#[Sortable(default: true)]`
+     * property, sign-prefixed (`-key`) when its direction is `desc` so it drops straight into
+     * a spatie/query-builder `defaultSort()`. Null when no property opts in.
+     *
+     * @param  class-string  $dataClass
+     */
+    public function defaultSort(string $dataClass): ?string
+    {
+        foreach ($this->properties($dataClass) as $property) {
+            $attribute = $this->attribute($property, Sortable::class);
+            if ($attribute === null || ! $attribute->default) {
+                continue;
+            }
+
+            $name = $attribute->name ?? Str::snake($property->getName());
+
+            return strtolower($attribute->direction) === 'desc' ? "-{$name}" : $name;
+        }
+
+        return null;
+    }
+
+    /**
      * @param  class-string  $dataClass
      * @return list<string>
      */

@@ -166,7 +166,9 @@ abstract class ResourceQuery
                 ...$this->extraIncludes(),
             ]);
 
-        if (($default = $this->defaultSort()) !== null) {
+        // A hand-written override wins; otherwise honor a `#[Sortable(default: true)]` on the DTO.
+        $default = $this->defaultSort() ?? $this->reflector->defaultSort($data);
+        if ($default !== null) {
             $builder->defaultSort($default);
         }
 
