@@ -166,8 +166,10 @@ abstract class ResourceQuery
                 ...$this->extraIncludes(),
             ]);
 
-        // A hand-written override wins; otherwise honor a `#[Sortable(default: true)]` on the DTO.
-        $default = $this->defaultSort() ?? $this->reflector->defaultSort($data);
+        // A hand-written override wins; otherwise honor a `#[Sortable(default: true)]` on the
+        // DTO — as a built AllowedSort, so a declared `column` survives into the default path
+        // instead of being rebuilt from a string that can't carry it.
+        $default = $this->defaultSort() ?? $this->reflector->defaultAllowedSort($data);
         if ($default !== null) {
             $builder->defaultSort($default);
         }

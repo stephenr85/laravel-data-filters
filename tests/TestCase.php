@@ -6,6 +6,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Rushing\DataFilters\ServiceProvider;
+use Rushing\DataFilters\Tests\Stubs\DivergentSortFilterData;
+use Rushing\DataFilters\Tests\Stubs\DivergentSortQuery;
 use Rushing\DataFilters\Tests\Stubs\Gadget;
 use Rushing\DataFilters\Tests\Stubs\GadgetFilterData;
 use Rushing\DataFilters\Tests\Stubs\GadgetQuery;
@@ -49,6 +51,11 @@ abstract class TestCase extends Orchestra
             'gadget' => [
                 'data' => GadgetFilterData::class,
                 'query' => GadgetQuery::class,
+                'model' => Gadget::class,
+            ],
+            'divergent' => [
+                'data' => DivergentSortFilterData::class,
+                'query' => DivergentSortQuery::class,
                 'model' => Gadget::class,
             ],
         ]);

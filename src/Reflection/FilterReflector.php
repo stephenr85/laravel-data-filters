@@ -12,12 +12,23 @@ use Rushing\DataFilters\Schema\FilterableAttributesStrategy;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedInclude;
 use Spatie\QueryBuilder\AllowedSort;
+use Spatie\QueryBuilder\Enums\SortDirection;
 
 /**
  * Reflects a Filter Data class's declared surface into the spatie/laravel-query-builder
  * allowed-sets. The same `#[Filterable]` attributes this reads are projected to
  * `x-filter` keywords by {@see FilterableAttributesStrategy};
  * one declaration site, two derived artifacts (ADR-0001).
+ *
+ * The default sort has three accessors rather than one because its consumers can't take the
+ * same shape. {@see defaultSort()} — the original — returns a sign-prefixed string, which is
+ * structurally unable to carry a `#[Sortable]`'s `name → column` mapping: a consumer
+ * rebuilding an `AllowedSort` from that string loses the column and orders by the sort key,
+ * a column that may not exist. It stays for the `name === column` case and is deprecated.
+ * {@see defaultAllowedSort()} returns a real `AllowedSort` with the mapping intact, for a
+ * spatie/query-builder consumer; {@see defaultSortColumn()} returns a raw
+ * `['column', 'direction']` pair, for a consumer ordering a plain Eloquent builder that has
+ * nowhere to put an `AllowedSort`.
  */
 class FilterReflector
 {
@@ -139,12 +150,84 @@ class FilterReflector
 
     /**
      * The DTO-declared default sort — the sort key of the first `#[Sortable(default: true)]`
-     * property, sign-prefixed (`-key`) when its direction is `desc` so it drops straight into
-     * a spatie/query-builder `defaultSort()`. Null when no property opts in.
+     * property, sign-prefixed (`-key`) when its direction is `desc`. Null when no property
+     * opts in.
+     *
+     * @deprecated A bare string cannot carry a `name → column` mapping, so a consumer
+     * rebuilding an `AllowedSort` from it silently loses the declared `column` and orders by
+     * the sort KEY. Correct only while `name === column`. Use {@see defaultAllowedSort()} for
+     * a spatie/query-builder consumer, or {@see defaultSortColumn()} for a plain-Eloquent one.
      *
      * @param  class-string  $dataClass
      */
     public function defaultSort(string $dataClass): ?string
+    {
+        $declared = $this->defaultSortable($dataClass);
+
+        if ($declared === null) {
+            return null;
+        }
+
+        [$name, , $direction] = $declared;
+
+        return $direction === 'desc' ? "-{$name}" : $name;
+    }
+
+    /**
+     * The DTO-declared default sort as a real `AllowedSort` — built the same way
+     * {@see allowedSorts()} builds the explicit-`?sort=` set, so the declared `column`
+     * survives into the default path instead of being dropped on the way through a string.
+     *
+     * @param  class-string  $dataClass
+     */
+    public function defaultAllowedSort(string $dataClass): ?AllowedSort
+    {
+        $declared = $this->defaultSortable($dataClass);
+
+        if ($declared === null) {
+            return null;
+        }
+
+        [$name, $column, $direction] = $declared;
+
+        $sort = $name === $column
+            ? AllowedSort::field($name)
+            : AllowedSort::field($name, $column);
+
+        return $direction === 'desc'
+            ? $sort->defaultDirection(SortDirection::Descending)
+            : $sort;
+    }
+
+    /**
+     * The DTO-declared default sort as a raw `['column', 'direction']` pair, for a consumer
+     * that orders a plain Eloquent builder and so has nowhere to put an `AllowedSort`.
+     *
+     * @param  class-string  $dataClass
+     * @return array{column: string, direction: 'asc'|'desc'}|null
+     */
+    public function defaultSortColumn(string $dataClass): ?array
+    {
+        $declared = $this->defaultSortable($dataClass);
+
+        if ($declared === null) {
+            return null;
+        }
+
+        [, $column, $direction] = $declared;
+
+        return ['column' => $column, 'direction' => $direction];
+    }
+
+    /**
+     * The first `#[Sortable(default: true)]` declaration, resolved to its three moving parts:
+     * the sort key, the column it maps to (the key itself when none is declared), and the
+     * direction. The one place the three public default-sort accessors read the attribute.
+     *
+     * @param  class-string  $dataClass
+     * @return array{0: string, 1: string, 2: 'asc'|'desc'}|null
+     */
+    private function defaultSortable(string $dataClass): ?array
     {
         foreach ($this->properties($dataClass) as $property) {
             $attribute = $this->attribute($property, Sortable::class);
@@ -154,7 +237,11 @@ class FilterReflector
 
             $name = $attribute->name ?? Str::snake($property->getName());
 
-            return strtolower($attribute->direction) === 'desc' ? "-{$name}" : $name;
+            return [
+                $name,
+                $attribute->column ?? $name,
+                strtolower($attribute->direction) === 'desc' ? 'desc' : 'asc',
+            ];
         }
 
         return null;
