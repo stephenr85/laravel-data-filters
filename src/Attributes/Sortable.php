@@ -3,6 +3,7 @@
 namespace Rushing\DataFilters\Attributes;
 
 use Attribute;
+use Rushing\DataFilters\Reflection\FilterReflector;
 
 /**
  * Declares a column-mapped allowed sort on a Filter Data class property. Emits an
@@ -17,9 +18,14 @@ use Attribute;
  *   #[Sortable(default: true, direction: 'desc')]  // default, descending
  *
  * At most one property should carry `default: true`; the reflector returns the
- * first it finds, sign-prefixed for `desc` so it maps straight to a query-string
- * default sort. It supersedes a hand-written `ResourceQuery::defaultSort()` only
+ * first it finds. It supersedes a hand-written `ResourceQuery::defaultSort()` only
  * when that returns null — an override still wins.
+ *
+ * The default sort is read as a built `AllowedSort` ({@see FilterReflector::defaultAllowedSort()}),
+ * or as a raw column/direction pair for a plain-Eloquent consumer
+ * ({@see FilterReflector::defaultSortColumn()}) — never as a sign-prefixed string,
+ * which has nowhere to carry a `name`/`column` divergence and so silently ordered
+ * by the sort key.
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
 class Sortable
