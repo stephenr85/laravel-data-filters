@@ -34,7 +34,7 @@ abstract class ResourceQuery
      */
     protected function baseQuery(Request $request): Builder
     {
-        return ($this->definition->model)::query();
+        return ($this->definition->requireModel())::query();
     }
 
     protected function defaultSort(): ?string

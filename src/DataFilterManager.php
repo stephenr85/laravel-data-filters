@@ -5,11 +5,13 @@ namespace Rushing\DataFilters;
 use Closure;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
+use Rushing\DataFilters\Contracts\ResourceModelResolver;
 use Rushing\DataFilters\Options\OptionsRegistry;
 use Rushing\DataFilters\Options\OptionsSource;
 use Rushing\DataFilters\Query\ResourceQuery;
 use Rushing\DataFilters\Registry\ResourceDefinition;
 use Rushing\DataFilters\Registry\ResourceRegistry;
+use Rushing\DataFilters\Registry\UnresolvableResourceModel;
 use Rushing\DataFilters\SavedFilters\SavedFilter;
 use Rushing\DataFilters\SavedFilters\SavedFilterValidator;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -58,9 +60,10 @@ class DataFilterManager
     }
 
     /**
-     * Resolve (or, given $config, register-then-resolve) a resource's wiring.
+     * Resolve (or, given $config, register-then-resolve) a resource's wiring. This is also
+     * where a lazily-declared model is resolved — see {@see resolveModel()}.
      *
-     * @param  array{data: class-string, query: class-string, model: class-string}|null  $config
+     * @param  array{data: class-string, query: class-string, model?: class-string|null, resource?: string|null}|null  $config
      */
     public function resource(string $key, ?array $config = null): ResourceDefinition
     {
@@ -68,7 +71,7 @@ class DataFilterManager
             $this->registry->register($key, $config);
         }
 
-        return $this->registry->get($key);
+        return $this->resolveModel($this->registry->get($key));
     }
 
     /**
@@ -77,11 +80,41 @@ class DataFilterManager
      */
     public function query(string $key): ResourceQuery
     {
-        $definition = $this->registry->get($key);
+        $definition = $this->resource($key);
 
         return $this->container->make($definition->query, [
             'definition' => $definition,
         ]);
+    }
+
+    /**
+     * Bind a concrete model onto a definition that declared none, via the host's
+     * {@see ResourceModelResolver} (ADR-0008).
+     *
+     * This runs HERE, at resource-resolution time, and not at discovery or boot time on
+     * purpose: a `#[ResourceFilter]` may well be discovered before whatever host registry
+     * knows its model has finished registering, and making that ordering load-bearing is
+     * exactly the class of silent-misconfiguration bug the attribute exists to remove.
+     * By the time a caller asks for a resource, every provider has booted.
+     */
+    private function resolveModel(ResourceDefinition $definition): ResourceDefinition
+    {
+        if ($definition->model !== null) {
+            return $definition;
+        }
+
+        if (! $this->container->bound(ResourceModelResolver::class)) {
+            throw UnresolvableResourceModel::unboundResolver($definition);
+        }
+
+        $model = $this->container->make(ResourceModelResolver::class)
+            ->resolveModel($definition->resource);
+
+        if ($model === null) {
+            throw UnresolvableResourceModel::resolverReturnedNull($definition);
+        }
+
+        return $definition->withModel($model);
     }
 
     /**

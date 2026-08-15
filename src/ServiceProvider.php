@@ -2,6 +2,7 @@
 
 namespace Rushing\DataFilters;
 
+use Rushing\DataFilters\Discovery\AttributedResourceFilterDiscovery;
 use Rushing\DataFilters\Options\OptionsRegistry;
 use Rushing\DataFilters\Registry\ResourceRegistry;
 use Rushing\DataFilters\Schema\FilterableAttributesStrategy;
@@ -25,6 +26,10 @@ class ServiceProvider extends PackageServiceProvider
 
         $this->app->singleton(OptionsRegistry::class, fn ($app) => new OptionsRegistry($app));
 
+        $this->app->singleton(AttributedResourceFilterDiscovery::class, fn ($app) => new AttributedResourceFilterDiscovery(
+            $app->make(ResourceRegistry::class)
+        ));
+
         $this->app->singleton(DataFilterManager::class, fn ($app) => new DataFilterManager(
             $app->make(ResourceRegistry::class),
             $app,
@@ -35,6 +40,29 @@ class ServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         $this->registerSchemaStrategy();
+        $this->discoverResourceFilters();
+    }
+
+    /**
+     * Register every `#[ResourceFilter]`-annotated class named (or reachable) from
+     * `config('data-filters.discover')` — ADR-0008.
+     *
+     * Boot phase, deliberately: the registry was already seeded from
+     * `config('data-filters.resources')` back in {@see packageRegistered()}, so a
+     * config-declared resource is present before discovery ever runs and discovery's
+     * `has()`-guard makes config win by construction. Both config keys default to `[]`,
+     * so a host that hasn't opted in pays nothing and behaves exactly as before.
+     */
+    protected function discoverResourceFilters(): void
+    {
+        $classes = config('data-filters.discover.classes', []);
+        $paths = config('data-filters.discover.paths', []);
+
+        if ($classes === [] && $paths === []) {
+            return;
+        }
+
+        $this->app->make(AttributedResourceFilterDiscovery::class)->discover($classes, $paths);
     }
 
     /**

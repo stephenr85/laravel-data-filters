@@ -63,6 +63,31 @@ The runtime map of resource key → wiring. Seeded from
 the bound classes self-describe their Query class and model.
 _Avoid_: manifest, resolver
 
+**ResourceFilter**:
+The repeatable `#[ResourceFilter(key:, resource:, model:, query:)]` class attribute
+that registers a Resource *from its declaration site* — the Filter Data class the
+attribute sits on IS the resource's `data` (ADR-0008). Repeatability is how a
+legacy alias key is declared (a second instance sharing a `resource`), which is
+why there is no `alias:` argument. `query: null` declares the resource without
+registering it, leaving a host to complete the wiring.
+_Avoid_: Registrable, ResourceAttribute, alias array
+
+**Override precedence** (of resource registration):
+The fixed three tiers a resource key resolves through, weakest last-registered:
+config seeds first and so wins by construction; `#[ResourceFilter]` discovery runs
+at boot and is `has()`-guarded, never overwriting; imperative
+`DataFilter::resource()` overwrites unconditionally and remains the last word
+(ADR-0008).
+_Avoid_: merge order, priority, cascade
+
+**Resource Model Resolver**:
+The `ResourceModelResolver` port this package DEFINES and never binds, letting a
+`#[ResourceFilter]` omit `model:` rather than restate one a host registry already
+knows. Consulted lazily at resource-resolution time, never at boot, so no
+provider-ordering dependency exists. Returns `null` for an unknown key — absence
+is a return value, not an exception (ADR-0008).
+_Avoid_: model locator, model factory, registry lookup
+
 **Saved Filter**:
 A persisted, named, owned set of filter + sort values targeting a Resource.
 Ownership is a polymorphic owner + a visibility enum, with an optional

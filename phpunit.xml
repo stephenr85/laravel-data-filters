@@ -8,5 +8,10 @@
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
+        <!-- Boot-phase tests need their own harness (config populated before the provider
+             boots), which Pest won't let a file override inside the Feature tree. -->
+        <testsuite name="Boot">
+            <directory>tests/Boot</directory>
+        </testsuite>
     </testsuites>
 </phpunit>
