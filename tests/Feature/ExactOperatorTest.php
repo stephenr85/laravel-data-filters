@@ -10,7 +10,7 @@ function colorProperty(): ReflectionProperty
 }
 
 it('maps to a spatie exact AllowedFilter', function () {
-    $filter = (new Exact)->toAllowedFilter('color');
+    $filter = (new Exact)->toAllowedFilter('color', 'color');
 
     expect($filter)->toBeInstanceOf(AllowedFilter::class)
         ->and($filter->getName())->toBe('color');

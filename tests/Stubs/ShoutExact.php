@@ -13,7 +13,7 @@ use Spatie\QueryBuilder\AllowedFilter;
  */
 class ShoutExact implements FilterOperator
 {
-    public function toAllowedFilter(string $name): AllowedFilter
+    public function toAllowedFilter(string $name, string $column): AllowedFilter
     {
         return AllowedFilter::callback($name, function ($query, $value) use ($name): void {
             $query->where($name, strtoupper((string) $value));

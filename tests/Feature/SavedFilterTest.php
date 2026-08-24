@@ -31,7 +31,7 @@ it('persists a saved filter with a uuid pk, cast params, and visibility enum', f
 it('accepts known filter/sort/include keys on save', function () {
     $params = savedFilterValidator()->validate('gadget', [
         'filter' => ['color' => 'red'],
-        'sort' => '-created_at',
+        'sort' => '-createdAt',
         'include' => 'parts',
     ]);
 

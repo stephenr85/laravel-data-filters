@@ -16,9 +16,9 @@ class Partial extends Operator
         return 'partial';
     }
 
-    public function toAllowedFilter(string $name): AllowedFilter
+    public function toAllowedFilter(string $name, string $column): AllowedFilter
     {
-        return AllowedFilter::partial($name);
+        return AllowedFilter::partial($name, $column);
     }
 
     public function toControl(ReflectionProperty $property): array

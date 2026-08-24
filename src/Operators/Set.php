@@ -18,10 +18,10 @@ class Set extends Operator
         return 'set';
     }
 
-    public function toAllowedFilter(string $name): AllowedFilter
+    public function toAllowedFilter(string $name, string $column): AllowedFilter
     {
-        return AllowedFilter::callback($name, function ($query, $value) use ($name): void {
-            $query->whereIn($name, Arr::wrap($value));
+        return AllowedFilter::callback($name, function ($query, $value) use ($column): void {
+            $query->whereIn($column, Arr::wrap($value));
         });
     }
 

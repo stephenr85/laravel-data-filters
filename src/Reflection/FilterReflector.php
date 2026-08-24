@@ -2,12 +2,12 @@
 
 namespace Rushing\DataFilters\Reflection;
 
-use Illuminate\Support\Str;
 use ReflectionClass;
 use ReflectionProperty;
 use Rushing\DataFilters\Attributes\Filterable;
 use Rushing\DataFilters\Attributes\Includable;
 use Rushing\DataFilters\Attributes\Sortable;
+use Rushing\DataFilters\FacetName;
 use Rushing\DataFilters\Schema\FilterableAttributesStrategy;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedInclude;
@@ -46,8 +46,8 @@ class FilterReflector
                 continue;
             }
 
-            $name = $attribute->name ?? Str::snake($property->getName());
-            $filters[] = $attribute->operator()->toAllowedFilter($name);
+            $name = FacetName::for($property, $attribute->name);
+            $filters[] = $attribute->operator()->toAllowedFilter($name, FacetName::column($property));
         }
 
         return $filters;
@@ -67,10 +67,13 @@ class FilterReflector
                 continue;
             }
 
-            $name = $attribute->name ?? Str::snake($property->getName());
-            $sorts[] = $attribute->column === null
-                ? AllowedSort::field($name)
-                : AllowedSort::field($name, $attribute->column);
+            // Always pass the column explicitly. `AllowedSort::field($name)` orders by the sort KEY,
+            // which was only ever correct while the key and the column were the same snake string —
+            // see {@see FacetName::column()} for why that coincidence ended.
+            $sorts[] = AllowedSort::field(
+                FacetName::for($property, $attribute->name),
+                $attribute->column ?? FacetName::column($property),
+            );
         }
 
         return $sorts;
@@ -90,7 +93,7 @@ class FilterReflector
                 continue;
             }
 
-            $name = $attribute->name ?? Str::snake($property->getName());
+            $name = FacetName::for($property, $attribute->name);
             $relationship = AllowedInclude::relationship($name);
 
             foreach (is_iterable($relationship) ? $relationship : [$relationship] as $include) {
@@ -102,8 +105,8 @@ class FilterReflector
     }
 
     /**
-     * The declared filter keys (the `#[Filterable]` name override, else snake of the
-     * property). Used by saved-filter validation/pruning.
+     * The declared filter keys (the `#[Filterable]` name override, else {@see FacetName}'s
+     * camelCase of the property). Used by saved-filter validation/pruning.
      *
      * @param  class-string  $dataClass
      * @return list<string>
@@ -132,7 +135,7 @@ class FilterReflector
                 continue;
             }
 
-            $name = $attribute->name ?? Str::snake($property->getName());
+            $name = FacetName::for($property, $attribute->name);
             $map[$name] = $property;
         }
 
@@ -235,11 +238,9 @@ class FilterReflector
                 continue;
             }
 
-            $name = $attribute->name ?? Str::snake($property->getName());
-
             return [
-                $name,
-                $attribute->column ?? $name,
+                FacetName::for($property, $attribute->name),
+                $attribute->column ?? FacetName::column($property),
                 strtolower($attribute->direction) === 'desc' ? 'desc' : 'asc',
             ];
         }
@@ -271,7 +272,7 @@ class FilterReflector
                 continue;
             }
 
-            $names[] = $declared->name ?? Str::snake($property->getName());
+            $names[] = FacetName::for($property, $declared->name);
         }
 
         return $names;

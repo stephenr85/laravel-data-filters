@@ -10,7 +10,7 @@ use Attribute;
  * sets). An imperative include that does not map to a property drops to the Query
  * class escape hatch.
  *
- *   #[Includable]                  // include name = snake(property)
+ *   #[Includable]                  // include name = camel(property)
  *   #[Includable(name: 'lineage')] // include name override
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]

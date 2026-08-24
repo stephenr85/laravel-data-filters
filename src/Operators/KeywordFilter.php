@@ -34,7 +34,7 @@ class KeywordFilter extends Operator
         return 'keywords';
     }
 
-    public function toAllowedFilter(string $name): AllowedFilter
+    public function toAllowedFilter(string $name, string $column): AllowedFilter
     {
         $model = $this->model;
 

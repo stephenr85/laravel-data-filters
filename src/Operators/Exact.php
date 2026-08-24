@@ -18,9 +18,9 @@ class Exact extends Operator
         return 'exact';
     }
 
-    public function toAllowedFilter(string $name): AllowedFilter
+    public function toAllowedFilter(string $name, string $column): AllowedFilter
     {
-        return AllowedFilter::exact($name);
+        return AllowedFilter::exact($name, $column);
     }
 
     public function toControl(ReflectionProperty $property): array

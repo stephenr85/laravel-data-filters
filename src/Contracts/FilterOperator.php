@@ -8,7 +8,10 @@ use Spatie\QueryBuilder\AllowedFilter;
 /**
  * One operator that maps a single filter three ways at once (ADR-0005):
  *
- *  - {@see toAllowedFilter()} — the server-side spatie/laravel-query-builder query,
+ *  - {@see toAllowedFilter()} — the server-side spatie/laravel-query-builder query. Takes the
+ *    wire NAME and the COLUMN separately: they were the same string until the wire went
+ *    camelCase ({@see \Rushing\DataFilters\FacetName::column()}), and an operator that
+ *    narrows a column of its own naming simply ignores the second argument.
  *  - {@see toControl()}       — the UI form control, refined by the property's type,
  *  - {@see keyword()}         — the `x-filter` JSON-Schema vendor keyword.
  *
@@ -20,7 +23,7 @@ use Spatie\QueryBuilder\AllowedFilter;
  */
 interface FilterOperator
 {
-    public function toAllowedFilter(string $name): AllowedFilter;
+    public function toAllowedFilter(string $name, string $column): AllowedFilter;
 
     /**
      * @return array<string, mixed>

@@ -51,7 +51,7 @@ it('reflects a declared sort into an AllowedSort', function () {
     $sorts = (new FilterReflector)->allowedSorts(GadgetFilterData::class);
 
     expect($sorts)->toHaveCount(1)
-        ->and($sorts[0]->getName())->toBe('created_at');
+        ->and($sorts[0]->getName())->toBe('createdAt');
 });
 
 it('reflects a declared include into an allowed include', function () {

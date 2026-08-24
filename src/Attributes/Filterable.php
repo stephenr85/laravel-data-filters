@@ -16,7 +16,7 @@ use Rushing\DataFilters\Contracts\FilterOperator;
  *   #[Filterable(Set::class, options: 'silos')]
  *   #[Filterable(Scope::class, scope: 'producedByCircuit')]
  *
- * `$name` overrides the filter key (defaulting to the snake_case property name) so
+ * `$name` overrides the filter key (defaulting to the camelCase property name, {@see \Rushing\DataFilters\FacetName}) so
  * the query key can target the underlying column rather than the API-renamed
  * output field (ADR-0002).
  */

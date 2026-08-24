@@ -59,7 +59,7 @@ it('inlines finite-domain options for a backed-enum set filter', function () {
 });
 
 it('emits an x-sort keyword for a sortable property', function () {
-    expect(gadgetProps()['createdAt']['x-sort'])->toBe(['name' => 'created_at']);
+    expect(gadgetProps()['createdAt']['x-sort'])->toBe(['name' => 'createdAt']);
 });
 
 it('yields the complete keyword set for a mixed filter data class', function () {

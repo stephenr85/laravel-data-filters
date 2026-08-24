@@ -76,7 +76,8 @@ Shipped operators: `Exact`, `Partial` (LIKE), `Range` (`{min,max}`), `Set` (wher
 back a relational scope with a type-ahead Options Source, ADR-0006). When attributes can't
 express a predicate, drop it to the Query class (below).
 
-A filter key defaults to the snake-cased property name; pass `name:` to override it
+A filter key defaults to the camelCase property name (the wire matches the property; see
+`FacetName`, the one place the convention lives); pass `name:` to override it
 (`#[Filterable(Set::class, name: 'tags:all')]`). The override is the bridge the saved
 filter validator uses to cast a stored value back to its property's type.
 

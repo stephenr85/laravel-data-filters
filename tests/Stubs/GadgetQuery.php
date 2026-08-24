@@ -8,6 +8,6 @@ class GadgetQuery extends ResourceQuery
 {
     protected function defaultSort(): ?string
     {
-        return '-created_at';
+        return '-createdAt';
     }
 }

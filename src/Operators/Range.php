@@ -20,17 +20,17 @@ class Range extends Operator
         return 'range';
     }
 
-    public function toAllowedFilter(string $name): AllowedFilter
+    public function toAllowedFilter(string $name, string $column): AllowedFilter
     {
-        return AllowedFilter::callback($name, function ($query, $value) use ($name): void {
+        return AllowedFilter::callback($name, function ($query, $value) use ($column): void {
             $min = is_array($value) ? ($value['min'] ?? $value[0] ?? null) : null;
             $max = is_array($value) ? ($value['max'] ?? $value[1] ?? null) : null;
 
             if ($min !== null && $min !== '') {
-                $query->where($name, '>=', $min);
+                $query->where($column, '>=', $min);
             }
             if ($max !== null && $max !== '') {
-                $query->where($name, '<=', $max);
+                $query->where($column, '<=', $max);
             }
         });
     }

@@ -2,10 +2,10 @@
 
 namespace Rushing\DataFilters\Schema;
 
-use Illuminate\Support\Str;
 use ReflectionProperty;
 use Rushing\DataFilters\Attributes\Filterable;
 use Rushing\DataFilters\Attributes\Sortable;
+use Rushing\DataFilters\FacetName;
 use Rushing\DataFilters\Keywords;
 use Schemastud\DataSchemas\Strategies\SchemaStrategy;
 use Schemastud\DataSchemas\Strategies\SchemaStrategyContext;
@@ -23,13 +23,12 @@ class FilterableAttributesStrategy implements SchemaStrategy
     public function apply(ReflectionProperty $property, array $schema, SchemaStrategyContext $context): array
     {
         if ($filterable = $this->firstAttribute($property, Filterable::class)) {
-            $name = $filterable->name ?? Str::snake($property->getName());
+            $name = FacetName::for($property, $filterable->name);
             $schema[Keywords::Filter] = $filterable->operator()->keyword($property, $name);
         }
 
         if ($sortable = $this->firstAttribute($property, Sortable::class)) {
-            $name = $sortable->name ?? Str::snake($property->getName());
-            $schema[Keywords::Sort] = ['name' => $name];
+            $schema[Keywords::Sort] = ['name' => FacetName::for($property, $sortable->name)];
         }
 
         return $schema;

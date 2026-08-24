@@ -29,7 +29,7 @@ class Search extends Operator
         return 'search';
     }
 
-    public function toAllowedFilter(string $name): AllowedFilter
+    public function toAllowedFilter(string $name, string $column): AllowedFilter
     {
         $columns = $this->columns;
 

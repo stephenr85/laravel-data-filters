@@ -31,7 +31,7 @@ class Scope extends Operator
         return 'scope';
     }
 
-    public function toAllowedFilter(string $name): AllowedFilter
+    public function toAllowedFilter(string $name, string $column): AllowedFilter
     {
         return AllowedFilter::scope($name, $this->scope);
     }

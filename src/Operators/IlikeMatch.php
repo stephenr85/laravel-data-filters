@@ -32,9 +32,9 @@ class IlikeMatch extends Operator
         return 'ilike';
     }
 
-    public function toAllowedFilter(string $name): AllowedFilter
+    public function toAllowedFilter(string $name, string $column): AllowedFilter
     {
-        $column = $this->column ?? $name;
+        $column = $this->column ?? $column;
         $mode = $this->mode;
 
         return AllowedFilter::callback($name, function (Builder $q, $value) use ($column, $mode): void {
