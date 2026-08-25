@@ -33,6 +33,10 @@
         "php-popcorn": {
             "type": "git",
             "url": "https://github.com/stephenr85/php-popcorn.git"
+        },
+        "laravel-pipeline-registry": {
+            "type": "git",
+            "url": "https://github.com/stephenr85/laravel-pipeline-registry.git"
         }
     },
     "autoload": {
