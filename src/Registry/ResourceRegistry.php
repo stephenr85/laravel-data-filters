@@ -7,6 +7,7 @@ use Rushing\Popcorn\Registries\BasicRegistry;
 use Rushing\Popcorn\Registries\Exceptions\RegistryMiss;
 use Rushing\Popcorn\Registries\Gated;
 use Rushing\Popcorn\Registries\IsRegistry;
+use Rushing\Popcorn\Registries\Key;
 use Rushing\Popcorn\Registries\OnDuplicate;
 use Rushing\Popcorn\Registries\Optionality;
 use Rushing\Popcorn\Registries\Registry;
@@ -136,6 +137,32 @@ class ResourceRegistry implements Gated, Registry
     public function get(string $key): ResourceDefinition
     {
         return $this->resolve($key);
+    }
+
+    /**
+     * The same lookup, `null` when there is no such resource — {@see get()}'s nullable twin, on
+     * Laravel's own `find()`/`findOrFail()` split.
+     *
+     * **This is the accessor to reach for when the key came off a request** (registry-kernel ticket
+     * 61). `get()` throws, and a `RegistryMiss` escaping a controller is a 500 — which is right for a
+     * key the code chose and wrong for one a user typed. A port that publishes only the throwing half
+     * leaves every host either catching a kernel exception it never imported or paying a
+     * `has()`-then-`get()` double lookup.
+     *
+     * It swallows one thing `tryResolve()` deliberately does not: a string that is not a legal
+     * {@see Key} at all (`Fragments`, `a/b`, `` — uppercase and `/` are rejected, not folded). At the
+     * kernel that is `InvalidRegistryKey` and correctly loud, because a declaration site spelling a key
+     * wrong is a bug. From a URL segment it is the same 404 as any other unknown resource, so the shape
+     * check happens here, through the kernel's own `tryParse()`, and never by relaxing the parser.
+     *
+     * Ambiguity still throws, exactly as `tryResolve()` promises. A miss is a question with no answer
+     * and this caller opted into handling it; ambiguity is a question with several.
+     */
+    public function find(string $key): ?ResourceDefinition
+    {
+        $parsed = Key::tryParse($key);
+
+        return $parsed === null ? null : $this->tryResolve($parsed);
     }
 
     /**

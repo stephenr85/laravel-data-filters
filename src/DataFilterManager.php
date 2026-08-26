@@ -75,6 +75,25 @@ class DataFilterManager
     }
 
     /**
+     * {@see resource()}'s nullable twin — `null` when no resource is registered under that key, or
+     * when the key is not a legal registry key at all.
+     *
+     * **Reach for this whenever the key came off a request** (registry-kernel ticket 61). A miss on a
+     * user-supplied path segment is an ordinary 404, and `resource()` answers it with a `RegistryMiss`
+     * that a controller has no business catching.
+     *
+     * A resource that IS registered but whose model cannot be resolved still throws
+     * {@see UnresolvableResourceModel} — that is a misconfiguration of a resource that exists, not an
+     * unknown key, and flattening it into `null` would answer 404 for a wiring bug.
+     */
+    public function tryResource(string $key): ?ResourceDefinition
+    {
+        $definition = $this->registry->find($key);
+
+        return $definition === null ? null : $this->resolveModel($definition);
+    }
+
+    /**
      * Build the per-resource Query class, with its definition bound and the
      * reflector injected.
      */

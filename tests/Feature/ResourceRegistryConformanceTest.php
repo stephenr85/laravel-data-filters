@@ -77,6 +77,34 @@ it('answers a miss with the kernel exception', function () {
     expect(app(ResourceRegistry::class)->tryResolve('nope'))->toBeNull();
 });
 
+/*
+ * Registry-kernel ticket 61: the port publishes BOTH halves of the miss pair, not just the throwing
+ * one. `get()`/`resource()` throw; `find()`/`tryResource()` return null. A host reading a key it took
+ * off a request uses the nullable half — otherwise a `RegistryMiss` becomes a 500 where a 404 was
+ * asserted, which is exactly what conforming this registry did to the flagship.
+ */
+
+it('publishes a nullable twin for a key that came from outside', function () {
+    $registry = app(ResourceRegistry::class);
+
+    expect($registry->find('widget'))->toBeInstanceOf(ResourceDefinition::class)
+        ->and($registry->find('nope'))->toBeNull();
+
+    // And the shape half of the same problem: a string that is not a legal key at all is a miss here,
+    // not the `InvalidRegistryKey` the kernel's parser (rightly) raises at a declaration site.
+    expect($registry->find('Widget'))->toBeNull()
+        ->and($registry->find('not a key'))->toBeNull()
+        ->and($registry->find('a/b'))->toBeNull()
+        ->and($registry->find(''))->toBeNull();
+});
+
+it('carries the nullable twin up through the manager and the facade', function () {
+    expect(DataFilter::tryResource('widget'))->toBeInstanceOf(ResourceDefinition::class)
+        ->and(DataFilter::tryResource('nope'))->toBeNull()
+        ->and(DataFilter::tryResource('Nope!'))->toBeNull()
+        ->and(fn () => DataFilter::resource('nope'))->toThrow(RegistryMiss::class);
+});
+
 it('seeds read-through, so config that lands after boot is still honoured', function () {
     // The archetype-c trap, asserted rather than narrated: `describe()` forces this singleton to
     // construct at boot, and a constructor snapshot would freeze the map there.

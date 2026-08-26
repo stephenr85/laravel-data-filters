@@ -11,6 +11,7 @@ use Rushing\DataFilters\Registry\ResourceRegistry;
 /**
  * @method static ResourceRegistry registry()
  * @method static ResourceDefinition resource(string $key, ?array $config = null)
+ * @method static ResourceDefinition|null tryResource(string $key)
  * @method static ResourceQuery query(string $key)
  * @method static void options(string $key, \Rushing\DataFilters\Options\OptionsSource|string|\Closure $source)
  * @method static bool hasOptions(string $key)
