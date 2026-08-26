@@ -14,6 +14,7 @@ use Rushing\DataFilters\Tests\Stubs\GadgetQuery;
 use Rushing\DataFilters\Tests\Stubs\Widget;
 use Rushing\DataFilters\Tests\Stubs\WidgetFilterData;
 use Rushing\DataFilters\Tests\Stubs\WidgetQuery;
+use Rushing\Popcorn\Laravel\PopcornServiceProvider;
 use Schemastud\DataSchemas\LaravelDataSchemasServiceProvider;
 use Spatie\LaravelData\LaravelDataServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
@@ -27,6 +28,11 @@ abstract class TestCase extends Orchestra
     {
         return [
             LaravelDataServiceProvider::class,
+            // laravel-popcorn binds RegistryIndex as a SINGLETON. Without it testbench hands every
+            // `make()` a fresh index, so `describe()` lands on a throwaway and every index assertion
+            // below would pass over an empty one (registry-kernel 27 D3). Testbench does not
+            // auto-discover, so requiring the package is not enough — it has to be named here.
+            PopcornServiceProvider::class,
             LaravelDataSchemasServiceProvider::class,
             QueryBuilderServiceProvider::class,
             ServiceProvider::class,

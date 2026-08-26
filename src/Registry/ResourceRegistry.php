@@ -2,35 +2,112 @@
 
 namespace Rushing\DataFilters\Registry;
 
-use InvalidArgumentException;
+use Rushing\Popcorn\Registries\Authorizer;
+use Rushing\Popcorn\Registries\BasicRegistry;
+use Rushing\Popcorn\Registries\Exceptions\RegistryMiss;
+use Rushing\Popcorn\Registries\Gated;
+use Rushing\Popcorn\Registries\IsRegistry;
+use Rushing\Popcorn\Registries\OnDuplicate;
+use Rushing\Popcorn\Registries\Optionality;
+use Rushing\Popcorn\Registries\Registry;
+use Rushing\Popcorn\Registries\RegistryArity;
+use Rushing\Popcorn\Registries\RegistryKey;
 
 /**
  * The runtime map of resource key → wiring (ADR-0002). Seeded from
  * `config('data-filters.resources')` and augmentable at runtime via the
  * `DataFilter` facade. A stable string key is how list endpoints, saved filters,
  * and the schema strategy all resolve the same resource.
+ *
+ * ## It is a popcorn registry now (registry-kernel ticket 38)
+ *
+ * The private `[key => ResourceDefinition]` array is gone; a composed {@see BasicRegistry} holds the
+ * entries under the declared `data-filters.resources` root, and every accessor this class always had
+ * — {@see get()}, {@see has()}, {@see all()}, {@see registerDefinition()} — is now sugar over the
+ * kernel contract rather than over an array. Composition, never a base class: this class owns domain
+ * vocabulary no kernel base could supply (kernel ticket 01 D1).
+ *
+ * Two consequences worth knowing, because a caller can see both:
+ *
+ * - **A miss throws {@see RegistryMiss}** (a `RuntimeException`) where it used to throw
+ *   `InvalidArgumentException`. The message names suggestions instead of the bare key.
+ * - **Re-registering an existing key moves it to the END of {@see all()}**, where assigning into a PHP
+ *   array preserved its position. `OnDuplicate::Supersede` displaces and appends. Nothing orders
+ *   across resources today — `all()` feeds `array_keys()` for a `Rule::in` and a schema lookup — but
+ *   it is a real difference, not an invisible one.
+ *
+ * ## Seeding is READ-THROUGH, and that is the migration's one behaviour change
+ *
+ * `describe()` forces this singleton to construct at the owner's `boot()`. A constructor that
+ * snapshotted `config('data-filters.resources')` would therefore freeze the map at boot, ahead of any
+ * host that finishes materialising its config later — the archetype-c trap (kernel ticket 37, and the
+ * live proof is `Splicewire\Tower\Tests\TenantTestCase::rebindDataFilterRegistry()`, a whole workaround
+ * for exactly this snapshot). So the constructor argument now defaults to `null` meaning *read the
+ * config at first access*, and the seed happens on the first read or write instead. Passing an explicit
+ * array still works and still wins, which is what keeps every existing `new ResourceRegistry([...])`
+ * call honest.
+ *
+ * @implements Registry<ResourceDefinition>
  */
-class ResourceRegistry
+#[IsRegistry(
+    root: 'data-filters.resources',
+    of: 'filterable resources — one wiring (Filter Data class + Query class + model) per resource key',
+    arity: RegistryArity::PickOne,
+    entryType: ResourceDefinition::class,
+    onDuplicate: OnDuplicate::Supersede,
+    optionality: Optionality::Optional,
+    note: 'Three tiers over one key, weakest last: `config(\'data-filters.resources\')` seeds and wins, '
+        .'`#[ResourceFilter]` discovery fills only the gaps (it `has()`-guards at the caller, ADR-0008), '
+        .'and the imperative `DataFilter::resource($key, $config)` escape hatch supersedes either.',
+)]
+class ResourceRegistry implements Gated, Registry
 {
-    /** @var array<string, ResourceDefinition> */
-    private array $resources = [];
+    private BasicRegistry $entries;
 
     /**
-     * @param  array<string, array{data: class-string, query: class-string, model?: class-string|null, resource?: string|null}>  $resources
+     * The config map to seed from, or null meaning *read `config('data-filters.resources')` when the
+     * seed is first needed*. Consumed once; see {@see seed()}.
+     *
+     * @var array<string, array{data: class-string, query: class-string, model?: class-string|null, resource?: string|null}>|null
      */
-    public function __construct(array $resources = [])
+    private ?array $pending;
+
+    private bool $seeded = false;
+
+    /**
+     * @param  array<string, array{data: class-string, query: class-string, model?: class-string|null, resource?: string|null}>|null  $resources
+     */
+    public function __construct(?array $resources = null)
     {
-        foreach ($resources as $key => $config) {
-            $this->register($key, $config);
-        }
+        $this->entries = BasicRegistry::for($this);
+        $this->pending = $resources;
     }
 
     /**
-     * @param  array{data: class-string, query: class-string, model?: class-string|null, resource?: string|null}  $config
+     * Register a resource's wiring — as a config array under a key, or as an already-built
+     * {@see ResourceDefinition} that carries its own key.
+     *
+     * The parameter is WIDENED from the contract rather than shadowing it (contravariance), so the
+     * package's own one- and two-argument calls keep working alongside the kernel's four-argument one.
+     *
+     * @param  ResourceDefinition|array{data: class-string, query: class-string, model?: class-string|null, resource?: string|null}|null  $entry
      */
-    public function register(string $key, array $config): void
+    public function register(RegistryKey|string|ResourceDefinition $key, mixed $entry = null, ?string $by = null, ?string $ability = null): static
     {
-        $this->registerDefinition(ResourceDefinition::fromConfig($key, $config));
+        $this->seed();
+
+        if ($key instanceof ResourceDefinition) {
+            $entry = $key;
+            $key = $key->key;
+        }
+
+        if (is_array($entry)) {
+            $entry = ResourceDefinition::fromConfig((string) $key, $entry);
+        }
+
+        $this->entries->register($key, $entry, $by, $ability);
+
+        return $this;
     }
 
     /**
@@ -39,28 +116,110 @@ class ResourceRegistry
      * {@see register()} it overwrites plainly — the `has()`-guard that makes discovery
      * strictly additive lives at the caller, not here (ADR-0008).
      */
-    public function registerDefinition(ResourceDefinition $definition): void
+    public function registerDefinition(ResourceDefinition $definition, ?string $by = null): void
     {
-        $this->resources[$definition->key] = $definition;
+        $this->register($definition, by: $by);
     }
 
-    public function has(string $key): bool
+    public function has(RegistryKey|string $key): bool
     {
-        return isset($this->resources[$key]);
-    }
+        $this->seed();
 
-    public function get(string $key): ResourceDefinition
-    {
-        return $this->resources[$key] ?? throw new InvalidArgumentException(
-            "No data-filters resource registered for key [{$key}]."
-        );
+        return $this->entries->has($key);
     }
 
     /**
+     * The wiring behind one resource key.
+     *
+     * @throws RegistryMiss no resource is registered under that key
+     */
+    public function get(string $key): ResourceDefinition
+    {
+        return $this->resolve($key);
+    }
+
+    /**
+     * Every registered resource, keyed as the CALLER spelled it — keys go relative in and absolute
+     * out (kernel ticket 20 D2), and a caller-facing map wants the caller's spelling.
+     *
      * @return array<string, ResourceDefinition>
      */
     public function all(): array
     {
-        return $this->resources;
+        $this->seed();
+
+        $resources = [];
+
+        foreach ($this->entries->relativeKeys() as $key) {
+            $resources[$key] = $this->entries->resolve($key);
+        }
+
+        return $resources;
+    }
+
+    public function resolve(RegistryKey|string $key): mixed
+    {
+        $this->seed();
+
+        return $this->entries->resolve($key);
+    }
+
+    public function tryResolve(RegistryKey|string $key): mixed
+    {
+        $this->seed();
+
+        return $this->entries->tryResolve($key);
+    }
+
+    public function matches(RegistryKey|string $key): array
+    {
+        $this->seed();
+
+        return $this->entries->matches($key);
+    }
+
+    public function keys(): array
+    {
+        $this->seed();
+
+        return $this->entries->keys();
+    }
+
+    public function unfiltered(): Registry
+    {
+        $this->seed();
+
+        return $this->entries->unfiltered();
+    }
+
+    public function authorizeWith(?Authorizer $authorizer): static
+    {
+        $this->entries->authorizeWith($authorizer);
+
+        return $this;
+    }
+
+    /**
+     * Fold the config-declared resources in, once, on the first read or write.
+     *
+     * The flag is set BEFORE the loop because seeding registers, and `register()` seeds — the guard is
+     * what makes that re-entry a no-op rather than a recursion. Ordering is preserved: config-declared
+     * resources are registered first, so a later discovery or imperative registration supersedes them
+     * exactly as it always did.
+     */
+    private function seed(): void
+    {
+        if ($this->seeded) {
+            return;
+        }
+
+        $this->seeded = true;
+
+        $resources = $this->pending ?? (function_exists('config') ? (array) config('data-filters.resources', []) : []);
+        $this->pending = null;
+
+        foreach ($resources as $key => $config) {
+            $this->register($key, $config, by: 'config:data-filters.resources');
+        }
     }
 }

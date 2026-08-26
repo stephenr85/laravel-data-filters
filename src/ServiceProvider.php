@@ -6,6 +6,7 @@ use Rushing\DataFilters\Discovery\AttributedResourceFilterDiscovery;
 use Rushing\DataFilters\Options\OptionsRegistry;
 use Rushing\DataFilters\Registry\ResourceRegistry;
 use Rushing\DataFilters\Schema\FilterableAttributesStrategy;
+use Rushing\Popcorn\Registries\RegistryIndex;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -20,9 +21,11 @@ class ServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        $this->app->singleton(ResourceRegistry::class, fn () => new ResourceRegistry(
-            config('data-filters.resources', [])
-        ));
+        // No config snapshot here, deliberately: the registry seeds itself READ-THROUGH on its first
+        // read or write (registry-kernel 38). `describe()` below forces this singleton to construct at
+        // boot, and a constructor that took `config('data-filters.resources')` as an argument would
+        // freeze the map at that moment — ahead of any host whose config materialises later.
+        $this->app->singleton(ResourceRegistry::class, fn () => new ResourceRegistry);
 
         $this->app->singleton(OptionsRegistry::class, fn ($app) => new OptionsRegistry($app));
 
@@ -41,6 +44,27 @@ class ServiceProvider extends PackageServiceProvider
     {
         $this->registerSchemaStrategy();
         $this->discoverResourceFilters();
+        $this->describeResourceRegistry();
+    }
+
+    /**
+     * Make `data-filters.resources` routable in the shared popcorn index.
+     *
+     * Declaring and indexing are two acts (registry-kernel 21 D1): {@see ResourceRegistry} carries the
+     * `#[IsRegistry]`, and this is where that root actually reaches {@see RegistryIndex} — until it
+     * does, the index holds nothing and `new ExistsInRegistry('data-filters.resources')` has no
+     * registry to validate against.
+     *
+     * LAST in `packageBooted()`, after discovery, so the described instance is the filled one. It is
+     * described unconditionally and possibly empty: a host that declares no resources still owns the
+     * branch.
+     */
+    protected function describeResourceRegistry(): void
+    {
+        $this->app->make(RegistryIndex::class)->describe(
+            $this->app->make(ResourceRegistry::class),
+            by: self::class,
+        );
     }
 
     /**
