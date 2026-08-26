@@ -1,0 +1,69 @@
+name: CI
+
+# The estate's first PACKAGE-tier suite runner (api-surface-coherence ticket 81).
+#
+# Until this file existed, this package's suite ran when, and only when, a human was standing in
+# this directory and typed the command — and the four red-test tickets that traced here were all
+# STALE, not broken: a rename landed in a sibling package, this package's assertion still described
+# the old world, and nothing between them ever ran.
+#
+# There is no `composer install` step, deliberately. `composer.lock` is gitignored here (as it is
+# in most of the family), so there is nothing to install FROM — and that is the point: `composer
+# update` resolves every `dev-main` family requirement to its PUSHED tip, which is exactly the
+# drift this job exists to catch. A sibling's pushed rename turns this red on the next run.
+#
+# Measured 2026-08-26 before this was written: a fresh clone of this repo with no
+# `composer.local.json` overlay resolves git-only and goes green (89 passed / 196 assertions), with
+# a path-free lock. The single obstruction was one UNDECLARED transitive repository —
+# `schemastud/php-json-ns`, required by `schemastud/laravel-data-schemas`, which declares the git
+# repository for it in its own composer.json where composer does not read it. Composer honours
+# `repositories` only in the ROOT package, so every root must enumerate the git repository of its
+# whole transitive family closure. That entry is now declared here; if this job ever fails at the
+# resolve step with "could not be found in any version", the cause is another such gap, not a
+# broken package.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    name: Pest suite (git-resolved dependencies)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, sqlite3, pdo_sqlite
+          coverage: none
+
+      # Verified 2026-08-26: every git dependency in this package's closure is PUBLIC
+      # (schemastud/php-json-ns, schemastud/laravel-data-schemas, stephenr85/laravel-popcorn,
+      # stephenr85/php-popcorn, stephenr85/laravel-pipeline-registry), so no PAT is required —
+      # the workflow token is here only to lift the unauthenticated GitHub API rate limit that
+      # composer's VCS driver hits when resolving five repositories. If a dependency is later made
+      # private, provision COMPOSER_GITHUB_TOKEN as a fine-grained PAT with read access to BOTH
+      # orgs; the failure mode is "Repository not found" at the resolve step.
+      - name: Authenticate composer for private repositories
+        run: composer config --global github-oauth.github.com "${{ secrets.COMPOSER_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}"
+
+      - name: Resolve dependencies from git
+        run: composer update --no-interaction --no-progress --prefer-dist
+
+      # The lock this job just produced must be path-free. It will be, on a runner where no sibling
+      # working tree exists — asserting it anyway keeps the job honest if someone later commits a
+      # co-dev lock, which is precisely how the flagship's CI ended up dying at its install step
+      # for weeks without reaching a single one of its own assertions.
+      - name: Assert the resolved lock is git-only
+        run: |
+          count=$(jq '[(.packages + (."packages-dev" // []))[] | select(.dist.type == "path")] | length' composer.lock)
+          if [ "$count" -ne 0 ]; then
+            echo "::error::composer.lock resolved ${count} packages from local paths. This job cannot be trusted."
+            exit 1
+          fi
+
+      - name: Run the suite
+        run: php -d memory_limit=512M vendor/bin/pest

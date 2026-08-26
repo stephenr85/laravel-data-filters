@@ -27,6 +27,10 @@
             "type": "git",
             "url": "https://github.com/schemastud/laravel-data-schemas.git"
         },
+        "php-json-ns": {
+            "type": "git",
+            "url": "https://github.com/schemastud/php-json-ns.git"
+        },
         "laravel-popcorn": {
             "type": "git",
             "url": "https://github.com/stephenr85/laravel-popcorn.git"
