@@ -10,7 +10,7 @@ use Spatie\QueryBuilder\AllowedFilter;
  * Host operator for Scout keyword search. Reuses the existing `HasCommonFilters`
  * closure: resolve matching ids through the model's Scout index, constrain by them,
  * and preserve the relevance ordering (`orderByValues`). The searchable model is
- * declared on the attribute (`#[Filterable(KeywordFilter::class, model: Fragment::class)]`).
+ * declared on the attribute (`#[Filterable(KeywordFilter::class, model: Article::class)]`).
  *
  * Extracted DOWN from the host (`Splicewire\Tower\Data\Filters\Operators\KeywordFilter`) into this
  * foundation so both the host's other filter DTOs and the beam-taxonomy cone can reach it
