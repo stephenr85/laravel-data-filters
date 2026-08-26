@@ -32,10 +32,11 @@ use Rushing\Popcorn\Registries\RegistryKey;
  *
  * - **A miss throws {@see RegistryMiss}** (a `RuntimeException`) where it used to throw
  *   `InvalidArgumentException`. The message names suggestions instead of the bare key.
- * - **Re-registering an existing key moves it to the END of {@see all()}**, where assigning into a PHP
- *   array preserved its position. `OnDuplicate::Supersede` displaces and appends. Nothing orders
- *   across resources today — `all()` feeds `array_keys()` for a `Rule::in` and a schema lookup — but
- *   it is a real difference, not an invisible one.
+ * - **Re-registering an existing key keeps its position in {@see all()}**, exactly as assigning into a
+ *   PHP array did. This paragraph used to say the opposite, and it was right when it was written:
+ *   `OnDuplicate::Supersede` displaced and appended until registry-kernel ticket 62 made supersession
+ *   an override IN PLACE. Nothing here orders across resources anyway — `all()` feeds `array_keys()`
+ *   for a `Rule::in` and a schema lookup — but the difference is now gone rather than merely harmless.
  *
  * ## Seeding is READ-THROUGH, and that is the migration's one behaviour change
  *
