@@ -56,7 +56,10 @@ class DataFilterManager
      */
     public function resolveOptions(string $key, ?string $search = null): array
     {
-        return $this->options->resolve($key, $search);
+        // `optionsFor()`, not `resolve()`: the registry declared itself in the popcorn kernel, where
+        // `resolve()` means "give me the entry under this key". Producing the OPTIONS from that entry is
+        // a different question with a different return type, so it kept the meaning and lost the name.
+        return $this->options->optionsFor($key, $search);
     }
 
     /**

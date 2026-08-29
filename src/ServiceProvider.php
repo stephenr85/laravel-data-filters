@@ -45,6 +45,7 @@ class ServiceProvider extends PackageServiceProvider
         $this->registerSchemaStrategy();
         $this->discoverResourceFilters();
         $this->describeResourceRegistry();
+        $this->describeOptionsRegistry();
     }
 
     /**
@@ -63,6 +64,24 @@ class ServiceProvider extends PackageServiceProvider
     {
         $this->app->make(RegistryIndex::class)->describe(
             $this->app->make(ResourceRegistry::class),
+            by: self::class,
+        );
+    }
+
+    /**
+     * Make `data-filters.options` routable in the shared popcorn index, for the same reason
+     * {@see describeResourceRegistry()} does it for resources: declaring and indexing are two acts, and
+     * an undeclared-or-unindexed registry is one `popcorn:registries` cannot show — so an agent looking
+     * for where to register an options source finds `data-filters.resources`, nothing for options, and
+     * builds a parallel mechanism beside this one.
+     *
+     * Described unconditionally and possibly empty: a host that registers no options source still owns
+     * the branch.
+     */
+    protected function describeOptionsRegistry(): void
+    {
+        $this->app->make(RegistryIndex::class)->describe(
+            $this->app->make(OptionsRegistry::class),
             by: self::class,
         );
     }
