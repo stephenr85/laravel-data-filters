@@ -60,13 +60,7 @@ class ServiceProvider extends PackageServiceProvider
      * described unconditionally and possibly empty: a host that declares no resources still owns the
      * branch.
      */
-    protected function describeResourceRegistry(): void
-    {
-        $this->app->make(RegistryIndex::class)->describe(
-            $this->app->make(ResourceRegistry::class),
-            by: self::class,
-        );
-    }
+    protected function describeResourceRegistry(): void {}
 
     /**
      * Make `data-filters.options` routable in the shared popcorn index, for the same reason
@@ -78,13 +72,7 @@ class ServiceProvider extends PackageServiceProvider
      * Described unconditionally and possibly empty: a host that registers no options source still owns
      * the branch.
      */
-    protected function describeOptionsRegistry(): void
-    {
-        $this->app->make(RegistryIndex::class)->describe(
-            $this->app->make(OptionsRegistry::class),
-            by: self::class,
-        );
-    }
+    protected function describeOptionsRegistry(): void {}
 
     /**
      * Register every `#[ResourceFilter]`-annotated class named (or reachable) from
