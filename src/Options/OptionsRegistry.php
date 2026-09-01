@@ -6,7 +6,9 @@ use Closure;
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
 use Rushing\DataFilters\Registry\ResourceRegistry;
+use Rushing\Popcorn\Registries\Authorizer;
 use Rushing\Popcorn\Registries\BasicRegistry;
+use Rushing\Popcorn\Registries\Gated;
 use Rushing\Popcorn\Registries\IsRegistry;
 use Rushing\Popcorn\Registries\OnDuplicate;
 use Rushing\Popcorn\Registries\Optionality;
@@ -53,7 +55,7 @@ use Rushing\Popcorn\Registries\RegistryKey;
 /**
  * @implements Registry<OptionsSource|class-string<OptionsSource>|Closure>
  */
-class OptionsRegistry implements Registry
+class OptionsRegistry implements Gated, Registry
 {
     /** @var BasicRegistry<OptionsSource|class-string<OptionsSource>|Closure> */
     private BasicRegistry $sources;
@@ -137,5 +139,12 @@ class OptionsRegistry implements Registry
         }
 
         return $source->options($search);
+    }
+
+    public function authorizeWith(?Authorizer $authorizer): static
+    {
+        $this->sources->authorizeWith($authorizer);
+
+        return $this;
     }
 }
