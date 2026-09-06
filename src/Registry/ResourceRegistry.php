@@ -11,7 +11,6 @@ use Rushing\Popcorn\Registries\Key;
 use Rushing\Popcorn\Registries\OnDuplicate;
 use Rushing\Popcorn\Registries\Optionality;
 use Rushing\Popcorn\Registries\Registry;
-use Rushing\Popcorn\Registries\RegistryArity;
 use Rushing\Popcorn\Registries\RegistryKey;
 
 /**
@@ -53,14 +52,10 @@ use Rushing\Popcorn\Registries\RegistryKey;
  */
 #[IsRegistry(
     root: 'data-filters.resources',
-    of: 'filterable resources — one wiring (Filter Data class + Query class + model) per resource key',
-    arity: RegistryArity::PickOne,
     entryType: ResourceDefinition::class,
     onDuplicate: OnDuplicate::Supersede,
     optionality: Optionality::Optional,
-    note: 'Three tiers over one key, weakest last: `config(\'data-filters.resources\')` seeds and wins, '
-        .'`#[ResourceFilter]` discovery fills only the gaps (it `has()`-guards at the caller, ADR-0008), '
-        .'and the imperative `DataFilter::resource($key, $config)` escape hatch supersedes either.',
+    description: 'filterable resources — one wiring (Filter Data class + Query class + model) per resource key. Three tiers over one key, weakest last: `config(\'data-filters.resources\')` seeds and wins, `#[ResourceFilter]` discovery fills only the gaps (it `has()`-guards at the caller, ADR-0008), and the imperative `DataFilter::resource($key, $config)` escape hatch supersedes either.',
 )]
 class ResourceRegistry implements Gated, Registry
 {

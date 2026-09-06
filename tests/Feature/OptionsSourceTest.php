@@ -49,7 +49,6 @@ it('declares itself in the popcorn kernel, so popcorn:registries can show where 
 
     expect($declaration)->not->toBeNull()
         ->and($declaration->root)->toBe('data-filters.options')
-        ->and($declaration->arity)->toBe([Rushing\Popcorn\Registries\RegistryArity::PickOne])
         // Supersede is what this class always did — registration was a plain array assignment, so a
         // second registration under one key replaced the first. The declaration records the behaviour
         // rather than a wish.

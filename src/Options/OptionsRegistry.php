@@ -13,7 +13,6 @@ use Rushing\Popcorn\Registries\IsRegistry;
 use Rushing\Popcorn\Registries\OnDuplicate;
 use Rushing\Popcorn\Registries\Optionality;
 use Rushing\Popcorn\Registries\Registry;
-use Rushing\Popcorn\Registries\RegistryArity;
 use Rushing\Popcorn\Registries\RegistryKey;
 
 /**
@@ -42,14 +41,9 @@ use Rushing\Popcorn\Registries\RegistryKey;
  */
 #[IsRegistry(
     root: 'data-filters.options',
-    of: 'options sources — one provider per options-source key, resolved lazily at read time',
-    arity: RegistryArity::PickOne,
     onDuplicate: OnDuplicate::Supersede,
     optionality: Optionality::Optional,
-    note: 'Supersede matches the behaviour this class has always had — registration was a plain array '
-        .'assignment, so a second registration under one key replaced the first and nothing reported it. '
-        .'The entry is deliberately un-narrowed (`mixed`): it is a union of an OptionsSource instance, '
-        .'its class-string, or a closure, and the kernel types an entry with one class-string.',
+    description: 'options sources — one provider per options-source key, resolved lazily at read time. Supersede matches the behaviour this class has always had — registration was a plain array assignment, so a second registration under one key replaced the first and nothing reported it. The entry is deliberately un-narrowed (`mixed`): it is a union of an OptionsSource instance, its class-string, or a closure, and the kernel types an entry with one class-string.',
     order: 20,
 )]
 /**
