@@ -23,6 +23,34 @@
         "wikimedia/composer-merge-plugin": "^2.1"
     },
     "repositories": {
+        "laravel-data-schemas-path": {
+            "type": "path",
+            "url": "../../schemastud/laravel-data-schemas",
+            "options": {
+                "symlink": true
+            }
+        },
+        "laravel-pipeline-registry-path": {
+            "type": "path",
+            "url": "../laravel-pipeline-registry",
+            "options": {
+                "symlink": true
+            }
+        },
+        "laravel-popcorn-path": {
+            "type": "path",
+            "url": "../laravel-popcorn",
+            "options": {
+                "symlink": true
+            }
+        },
+        "php-popcorn-path": {
+            "type": "path",
+            "url": "../php-popcorn",
+            "options": {
+                "symlink": true
+            }
+        },
         "laravel-data-schemas": {
             "type": "git",
             "url": "https://github.com/schemastud/laravel-data-schemas.git"
