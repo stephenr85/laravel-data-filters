@@ -52,7 +52,7 @@ it('declares itself in the popcorn kernel, so popcorn:registries can show where 
         // Supersede is what this class always did — registration was a plain array assignment, so a
         // second registration under one key replaced the first. The declaration records the behaviour
         // rather than a wish.
-        ->and($declaration->onDuplicate)->toBe(Rushing\Popcorn\Registries\OnDuplicate::Supersede);
+        ->and($declaration->onKeyDuplicate)->toBe(Rushing\Popcorn\Registries\OnKeyDuplicate::Supersede);
 });
 
 it('reaches the shared index at boot, because declaring and indexing are two acts', function () {

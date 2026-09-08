@@ -8,8 +8,8 @@ use Rushing\Popcorn\Registries\Exceptions\RegistryMiss;
 use Rushing\Popcorn\Registries\Gated;
 use Rushing\Popcorn\Registries\IsRegistry;
 use Rushing\Popcorn\Registries\Key;
-use Rushing\Popcorn\Registries\OnDuplicate;
-use Rushing\Popcorn\Registries\Optionality;
+use Rushing\Popcorn\Registries\OnKeyDuplicate;
+use Rushing\Popcorn\Registries\PopulationRequirement;
 use Rushing\Popcorn\Registries\Registry;
 use Rushing\Popcorn\Registries\RegistryKey;
 
@@ -33,7 +33,7 @@ use Rushing\Popcorn\Registries\RegistryKey;
  *   `InvalidArgumentException`. The message names suggestions instead of the bare key.
  * - **Re-registering an existing key keeps its position in {@see all()}**, exactly as assigning into a
  *   PHP array did. This paragraph used to say the opposite, and it was right when it was written:
- *   `OnDuplicate::Supersede` displaced and appended until registry-kernel ticket 62 made supersession
+ *   `OnKeyDuplicate::Supersede` displaced and appended until registry-kernel ticket 62 made supersession
  *   an override IN PLACE. Nothing here orders across resources anyway — `all()` feeds `array_keys()`
  *   for a `Rule::in` and a schema lookup — but the difference is now gone rather than merely harmless.
  *
@@ -53,8 +53,8 @@ use Rushing\Popcorn\Registries\RegistryKey;
 #[IsRegistry(
     root: 'data-filters.resources',
     entryType: ResourceDefinition::class,
-    onDuplicate: OnDuplicate::Supersede,
-    optionality: Optionality::Optional,
+    onKeyDuplicate: OnKeyDuplicate::Supersede,
+    populationRequirement: PopulationRequirement::Optional,
     description: 'filterable resources — one wiring (Filter Data class + Query class + model) per resource key. Three tiers over one key, weakest last: `config(\'data-filters.resources\')` seeds and wins, `#[ResourceFilter]` discovery fills only the gaps (it `has()`-guards at the caller, ADR-0008), and the imperative `DataFilter::resource($key, $config)` escape hatch supersedes either.',
 )]
 class ResourceRegistry implements Gated, Registry

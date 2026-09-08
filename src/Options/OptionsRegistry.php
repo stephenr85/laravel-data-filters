@@ -10,8 +10,8 @@ use Rushing\Popcorn\Registries\Authorizer;
 use Rushing\Popcorn\Registries\BasicRegistry;
 use Rushing\Popcorn\Registries\Gated;
 use Rushing\Popcorn\Registries\IsRegistry;
-use Rushing\Popcorn\Registries\OnDuplicate;
-use Rushing\Popcorn\Registries\Optionality;
+use Rushing\Popcorn\Registries\OnKeyDuplicate;
+use Rushing\Popcorn\Registries\PopulationRequirement;
 use Rushing\Popcorn\Registries\Registry;
 use Rushing\Popcorn\Registries\RegistryKey;
 
@@ -41,8 +41,8 @@ use Rushing\Popcorn\Registries\RegistryKey;
  */
 #[IsRegistry(
     root: 'data-filters.options',
-    onDuplicate: OnDuplicate::Supersede,
-    optionality: Optionality::Optional,
+    onKeyDuplicate: OnKeyDuplicate::Supersede,
+    populationRequirement: PopulationRequirement::Optional,
     description: 'options sources — one provider per options-source key, resolved lazily at read time. Supersede matches the behaviour this class has always had — registration was a plain array assignment, so a second registration under one key replaced the first and nothing reported it. The entry is deliberately un-narrowed (`mixed`): it is a union of an OptionsSource instance, its class-string, or a closure, and the kernel types an entry with one class-string.',
     order: 20,
 )]
