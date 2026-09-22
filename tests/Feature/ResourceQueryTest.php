@@ -40,3 +40,31 @@ it('applies declared filters to a caller-provided base query', function () {
 
     expect($names)->toBe(['Alpha', 'Gamma']);
 });
+
+it('composes declared controls onto an existing base without losing its restriction or mapped sort', function () {
+    $model = Rushing\DataFilters\Tests\Stubs\Gadget::class;
+    $model::create(['name' => 'Allowed heavy', 'color' => 'red', 'weight' => 9]);
+    $model::create(['name' => 'Allowed light', 'color' => 'red', 'weight' => 1]);
+    $model::create(['name' => 'Forbidden heavy', 'color' => 'blue', 'weight' => 20]);
+    $query = DataFilter::query('divergent');
+    $base = $model::query()->where('color', 'red')->orderBy('weight');
+    $request = Request::create('/', 'GET', ['filter' => ['color' => 'red']]);
+
+    expect($query->applyTo($base, $request)->pluck('name')->all())->toBe(['Allowed heavy', 'Allowed light']);
+    expect($query->applyTo($model::query()->where('color', 'red')->orderByDesc('weight'), Request::create('/', 'GET', ['sort' => 'heaviness']))
+        ->pluck('name')->all())->toBe(['Allowed light', 'Allowed heavy']);
+});
+
+it('exposes the declared authorization base without applying caller filters', function () {
+    $query = new class(DataFilter::resource('widget'), app(Rushing\DataFilters\Reflection\FilterReflector::class)) extends ResourceQuery
+    {
+        protected function baseQuery(Request $request): Illuminate\Contracts\Database\Eloquent\Builder
+        {
+            return Widget::query()->where('name', '!=', 'Gamma');
+        }
+    };
+    $request = Request::create('/', 'GET', ['filter' => ['color' => 'blue']]);
+
+    expect($query->authorizationQuery($request)->pluck('name')->all())->toBe(['Alpha', 'Beta']);
+    expect($query->apply($request)->pluck('name')->all())->toBe(['Beta']);
+});

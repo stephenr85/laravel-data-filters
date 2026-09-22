@@ -148,11 +148,29 @@ abstract class ResourceQuery
             ]);
     }
 
+    /** The declared row boundary, before caller-selected filters, sorting or includes. */
+    public function authorizationQuery(Request $request): Builder
+    {
+        return $this->baseQuery($request);
+    }
+
     public function apply(Request $request): QueryBuilder
     {
-        $data = $this->definition->data;
+        return $this->applyTo($this->authorizationQuery($request), $request);
+    }
 
-        $builder = QueryBuilder::for($this->baseQuery($request), $request)
+    /** Apply all declared query controls to a caller-composed, authorized base. */
+    public function applyTo(Builder $base, Request $request): QueryBuilder
+    {
+        $data = $this->definition->data;
+        /** @var AllowedSort|string|null $default */
+        $default = $this->defaultSort() ?? $this->reflector->defaultAllowedSort($data);
+        // A declared or requested sort wins over the backing's incidental ordering.
+        if ($request->filled('sort') || $default !== null) {
+            $base->reorder();
+        }
+
+        $builder = QueryBuilder::for($base, $request)
             ->allowedFilters(...[
                 ...$this->reflector->allowedFilters($data),
                 ...$this->extraFilters(),
@@ -169,8 +187,6 @@ abstract class ResourceQuery
         // A hand-written override wins; otherwise honor a `#[Sortable(default: true)]` on the
         // DTO — as a built AllowedSort, so a declared `column` survives into the default path
         // instead of being rebuilt from a string that can't carry it.
-        /** @var AllowedSort|string|null $default */
-        $default = $this->defaultSort() ?? $this->reflector->defaultAllowedSort($data);
         if ($default !== null) {
             $builder->defaultSort($default);
         }

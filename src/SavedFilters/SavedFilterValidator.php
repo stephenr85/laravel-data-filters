@@ -4,7 +4,6 @@ namespace Rushing\DataFilters\SavedFilters;
 
 use Illuminate\Validation\ValidationException;
 use Rushing\DataFilters\DataFilterManager;
-use Rushing\DataFilters\Query\ResourceQuery;
 
 /**
  * Validate-on-save, tolerate-on-read (ADR-0007). On save, every filter/sort/include
@@ -32,23 +31,39 @@ class SavedFilterValidator
     public function validate(string $resource, array $params): array
     {
         $query = $this->manager->query($resource);
+
+        return $this->validateVocabulary($resource, $params, $query->filterNames(), $query->sortNames(), $query->includeNames(), $query->filterProperties());
+    }
+
+    /**
+     * Validate a declared vocabulary without requiring an Eloquent query or executing a backing.
+     *
+     * @param  array<string, mixed>  $params
+     * @param  list<string>  $filterNames
+     * @param  list<string>  $sortNames
+     * @param  list<string>  $includeNames
+     * @param  array<string, \ReflectionProperty>  $properties
+     * @return array<string, mixed>
+     */
+    public function validateVocabulary(string $resource, array $params, array $filterNames, array $sortNames, array $includeNames = [], array $properties = []): array
+    {
         $errors = [];
 
         foreach (array_keys($params['filter'] ?? []) as $key) {
-            if (! in_array($key, $query->filterNames(), true)) {
+            if (! in_array($key, $filterNames, true)) {
                 $errors["query_parameters.filter.{$key}"][] = "Unknown filter [{$key}] for resource [{$resource}].";
             }
         }
 
         foreach ($this->tokens($params['sort'] ?? []) as $sort) {
             $field = ltrim((string) $sort, '-');
-            if ($field !== '' && ! in_array($field, $query->sortNames(), true)) {
+            if ($field !== '' && ! in_array($field, $sortNames, true)) {
                 $errors['query_parameters.sort'][] = "Unknown sort [{$field}] for resource [{$resource}].";
             }
         }
 
         foreach ($this->tokens($params['include'] ?? []) as $include) {
-            if ($include !== '' && ! in_array($include, $query->includeNames(), true)) {
+            if ($include !== '' && ! in_array($include, $includeNames, true)) {
                 $errors['query_parameters.include'][] = "Unknown include [{$include}] for resource [{$resource}].";
             }
         }
@@ -57,7 +72,7 @@ class SavedFilterValidator
             $errors['query_parameters.limit'][] = 'The limit must be numeric.';
         }
 
-        [$filters, $castErrors] = $this->castFilters($query, $params['filter'] ?? []);
+        [$filters, $castErrors] = $this->castFilters($properties, $params['filter'] ?? []);
         $errors += $castErrors;
 
         if ($errors !== []) {
@@ -80,13 +95,12 @@ class SavedFilterValidator
      *
      * @return array{0: array<string, mixed>, 1: array<string, list<string>>}
      */
-    private function castFilters(ResourceQuery $query, mixed $filter): array
+    private function castFilters(array $properties, mixed $filter): array
     {
         if (! is_array($filter)) {
             return [[], []];
         }
 
-        $properties = $query->filterProperties();
         $errors = [];
 
         foreach ($filter as $key => $value) {

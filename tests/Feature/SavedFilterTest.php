@@ -110,3 +110,18 @@ it('drops a now-invalid key at apply time without failing', function () {
 
     expect(DataFilter::applySaved($saved)->get()->pluck('name')->all())->toBe(['Alpha']);
 });
+
+it('validates a backing vocabulary without a query registration and preserves zero and false values', function () {
+    $params = ['filter' => ['count' => 0, 'enabled' => false], 'sort' => '-count'];
+    expect(savedFilterValidator()->validateVocabulary('external-stream', $params, ['count', 'enabled'], ['count']))->toBe($params);
+    expect(DataFilter::registry()->has('external-stream'))->toBeFalse();
+});
+
+it('rejects controls not declared by the backing vocabulary', function (array $params) {
+    savedFilterValidator()->validateVocabulary('external-stream', $params, ['count'], ['createdAt']);
+})->with([
+    [['filter' => ['createdAt' => 'today']]],
+    [['sort' => 'count']],
+    [['include' => 'owner']],
+    [['limit' => 'all']],
+])->throws(ValidationException::class);
