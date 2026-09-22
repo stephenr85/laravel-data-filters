@@ -12,8 +12,7 @@ use Spatie\QueryBuilder\AllowedFilter;
  * filter key; pass `column` to target a renamed column (e.g. `parent_id`).
  *
  * Extracted DOWN from the host (`Splicewire\Tower\Data\Filters\Operators\NullableExact`) into this
- * foundation with the beam-taxonomy Silo cone (tower-api-dissolution issue 17 P2). The old FQCN
- * is kept resolving via a back-compat subclass shim in the host.
+ * foundation with the beam-taxonomy Silo cone (tower-api-dissolution issue 17 P2).
  */
 class NullableExact extends Operator
 {
@@ -41,7 +40,7 @@ class NullableExact extends Operator
             }
 
             $q->where($column, $value);
-        });
+        })->nullable();
     }
 
     public function toControl(ReflectionProperty $property): array
