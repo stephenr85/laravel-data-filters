@@ -125,3 +125,8 @@ it('rejects controls not declared by the backing vocabulary', function (array $p
     [['include' => 'owner']],
     [['limit' => 'all']],
 ])->throws(ValidationException::class);
+
+it('answers its morph alias, not its class name, so a permission token or *_type column never carries the FQCN', function () {
+    expect((new SavedFilter)->getMorphClass())->toBe('saved_filter')
+        ->and(Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel('saved_filter'))->toBe(SavedFilter::class);
+});

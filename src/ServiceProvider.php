@@ -2,9 +2,11 @@
 
 namespace Rushing\DataFilters;
 
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Rushing\DataFilters\Discovery\AttributedResourceFilterDiscovery;
 use Rushing\DataFilters\Options\OptionsRegistry;
 use Rushing\DataFilters\Registry\ResourceRegistry;
+use Rushing\DataFilters\SavedFilters\SavedFilter;
 use Rushing\DataFilters\Schema\FilterableAttributesStrategy;
 use Rushing\Popcorn\Registries\RegistryIndex;
 use Spatie\LaravelPackageTools\Package;
@@ -42,10 +44,26 @@ class ServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
+        $this->registerMorphAlias();
         $this->registerSchemaStrategy();
         $this->discoverResourceFilters();
         $this->describeResourceRegistry();
         $this->describeOptionsRegistry();
+    }
+
+    /**
+     * `saved_filter` — the package that owns {@see SavedFilter} names it, additively.
+     *
+     * A host that binds a policy to SavedFilter (beam does, for the saved-views surface) derives its
+     * permission tokens from `getMorphClass()`, and an unaliased model answers its FQCN, which slugs
+     * into `rushingdatafilterssavedfilterssavedfilter.view`. The same string would land in any
+     * polymorphic `*_type` column that records a saved filter (activity, sync lineage). The alias is the
+     * snake_case short name. A host keeps override authority: `morphMap()` merges last-writer-wins and
+     * host providers boot after this one.
+     */
+    protected function registerMorphAlias(): void
+    {
+        Relation::morphMap(['saved_filter' => SavedFilter::class]);
     }
 
     /**
