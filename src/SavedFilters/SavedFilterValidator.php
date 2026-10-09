@@ -51,25 +51,25 @@ class SavedFilterValidator
 
         foreach (array_keys($params['filter'] ?? []) as $key) {
             if (! in_array($key, $filterNames, true)) {
-                $errors["query_parameters.filter.{$key}"][] = "Unknown filter [{$key}] for resource [{$resource}].";
+                $errors["queryParameters.filter.{$key}"][] = "Unknown filter [{$key}] for resource [{$resource}].";
             }
         }
 
         foreach ($this->tokens($params['sort'] ?? []) as $sort) {
             $field = ltrim((string) $sort, '-');
             if ($field !== '' && ! in_array($field, $sortNames, true)) {
-                $errors['query_parameters.sort'][] = "Unknown sort [{$field}] for resource [{$resource}].";
+                $errors['queryParameters.sort'][] = "Unknown sort [{$field}] for resource [{$resource}].";
             }
         }
 
         foreach ($this->tokens($params['include'] ?? []) as $include) {
             if ($include !== '' && ! in_array($include, $includeNames, true)) {
-                $errors['query_parameters.include'][] = "Unknown include [{$include}] for resource [{$resource}].";
+                $errors['queryParameters.include'][] = "Unknown include [{$include}] for resource [{$resource}].";
             }
         }
 
         if (isset($params['limit']) && ! is_numeric($params['limit'])) {
-            $errors['query_parameters.limit'][] = 'The limit must be numeric.';
+            $errors['queryParameters.limit'][] = 'The limit must be numeric.';
         }
 
         [$filters, $castErrors] = $this->castFilters($properties, $params['filter'] ?? []);
@@ -111,7 +111,7 @@ class SavedFilterValidator
             try {
                 $filter[$key] = $this->caster->cast($properties[$key], $value);
             } catch (InvalidFilterValue $e) {
-                $errors["query_parameters.filter.{$key}"][] = "Filter [{$key}] {$e->getMessage()}.";
+                $errors["queryParameters.filter.{$key}"][] = "Filter [{$key}] {$e->getMessage()}.";
             }
         }
 

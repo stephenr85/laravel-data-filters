@@ -130,3 +130,41 @@ it('answers its morph alias, not its class name, so a permission token or *_type
     expect((new SavedFilter)->getMorphClass())->toBe('saved_filter')
         ->and(Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel('saved_filter'))->toBe(SavedFilter::class);
 });
+
+it('emits only camelCase saved-filter error paths in an HTTP validation response', function () {
+    Illuminate\Support\Facades\Route::post('/saved-filter-wire-test', function (Illuminate\Http\Request $request) {
+        return savedFilterValidator()->validate('gadget', $request->input('queryParameters'));
+    });
+
+    $response = $this->postJson('/saved-filter-wire-test', ['queryParameters' => [
+        'filter' => ['bogus' => 'x', 'weight' => 'heavy'],
+        'sort' => 'unknown',
+        'include' => 'unknown',
+        'limit' => 'many',
+    ]]);
+
+    $response->assertUnprocessable();
+    expect(array_keys($response->json('errors')))->toEqualCanonicalizing([
+        'queryParameters.filter.bogus',
+        'queryParameters.filter.weight',
+        'queryParameters.sort',
+        'queryParameters.include',
+        'queryParameters.limit',
+    ]);
+});
+
+it('accepts camel facet names and rejects their snake spelling without a wire alias', function () {
+    expect(savedFilterValidator()->validate('gadget', [
+        'filter' => ['ownedBy' => 'owner'],
+        'sort' => 'createdAt',
+    ]))->toBe(['filter' => ['ownedBy' => 'owner'], 'sort' => 'createdAt']);
+
+    try {
+        savedFilterValidator()->validate('gadget', ['filter' => ['owned_by' => 'owner'], 'sort' => 'created_at']);
+        $this->fail('Snake facet names must be rejected.');
+    } catch (ValidationException $exception) {
+        expect(array_keys($exception->errors()))->toEqualCanonicalizing([
+            'queryParameters.filter.owned_by', 'queryParameters.sort',
+        ]);
+    }
+});
