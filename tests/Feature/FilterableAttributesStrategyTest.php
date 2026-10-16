@@ -82,3 +82,13 @@ it('emits x-filter through the container-resolved generator a host actually uses
     // never emits, because a bare `strategies` slot suppresses nothing but also configures nothing.
     expect($schema)->toHaveKeys(['$schema', '$id']);
 });
+
+it('projects the declared default sort and direction for runtime collection clients', function () {
+    $schema = app(Generator::class)->generate(new ReflectionClass(Rushing\DataFilters\Tests\Stubs\SortedData::class));
+
+    expect($schema['properties']['rank']['x-sort'])->toBe([
+        'name' => 'rank',
+        'default' => true,
+        'direction' => 'desc',
+    ]);
+});

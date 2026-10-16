@@ -28,7 +28,11 @@ class FilterableAttributesStrategy implements SchemaStrategy
         }
 
         if ($sortable = $this->firstAttribute($property, Sortable::class)) {
-            $schema[Keywords::Sort] = ['name' => FacetName::for($property, $sortable->name)];
+            $schema[Keywords::Sort] = [
+                'name' => FacetName::for($property, $sortable->name),
+                'default' => $sortable->default,
+                'direction' => $sortable->direction,
+            ];
         }
 
         return $schema;
