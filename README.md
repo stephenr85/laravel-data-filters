@@ -7,7 +7,7 @@ declaration:
 - a [`spatie/laravel-query-builder`](https://github.com/spatie/laravel-query-builder)
   query for the list endpoint,
 - an `x-filter` JSON-Schema keyword for a UI filter form (via
-  [`rushing/laravel-data-schemas`](https://github.com/stephenr85/laravel-data-schemas)),
+  [`schemastud/laravel-data-schemas`](https://github.com/schemastud/laravel-data-schemas)),
 - a persisted, validated saved filter.
 
 The host owns its models, authorization scoping, and response DTOs. The package owns the
@@ -173,6 +173,22 @@ $assets = DataFilter::applySaved($savedFilter)->paginate();
 
 The host owns the CRUD endpoint and maps each resource to its response DTO; the package
 stays agnostic about the output shape.
+
+## Registries
+
+This package declares two registries. [The data-filters cluster](docs/registries/data-filters.mdx)
+page shows how they fit together.
+
+- [`data-filters.resources`](docs/registries/data-filters.resources.mdx): one wiring per resource key
+  (Filter Data class, Query class, model), filled from config, attributes or code.
+- [`data-filters.options`](docs/registries/data-filters.options.mdx): the searchable choice lists
+  behind relational filter controls, one per `optionsRef`. `DataFilter::options()` registers here.
+
+It also registers into one registry it doesn't own:
+
+- [`schemas.strategies`](https://github.com/schemastud/laravel-data-schemas/blob/main/docs/registries/schemas.strategies.mdx),
+  from `schemastud/laravel-data-schemas`: `FilterableAttributesStrategy`, which projects the
+  `x-filter` and `x-sort` keywords described under UI parity.
 
 ## License
 
