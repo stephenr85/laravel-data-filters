@@ -1,0 +1,74 @@
+---
+title: Filter options sources
+segment: data-filters.options
+nav_order: 20
+excerpt: The searchable choice lists behind relational filter controls, one provider per optionsRef.
+---
+
+# Filter options sources
+
+`data-filters.options` holds **options sources**: providers that return the choices for a
+relational filter control as a list of `{value, label}` pairs, optionally narrowed by a search
+string. A filter that can't list its choices inline (owners, projects, tags drawn from the database)
+names a source instead, and the generated `x-filter` schema carries that name as `optionsRef` for
+your filter form to fetch.
+
+{/* registry-facts:start — generated from the #[IsRegistry] declaration by `splicewire:beam:docs:registries:scaffold`. Rerun the command; do not edit between these markers. */}
+
+- **Root:** `data-filters.options`
+- **Entries:** any value (`mixed`)
+- **Duplicate keys:** Supersede — a later registration under a taken key replaces the earlier entry, in its place
+- **Population:** Optional — an empty registry is normal
+- **Order:** `20` (display order, ascending)
+- **Declared by:** `Rushing\DataFilters\Options\OptionsRegistry`
+
+{/* registry-facts:end */}
+
+## Registering a source
+
+The package ships none. Register one per `optionsRef`, as a closure, an `OptionsSource` instance, or
+an `OptionsSource` class name:
+
+```php
+use Rushing\DataFilters\Facades\DataFilter;
+
+DataFilter::options('owners', fn (?string $search) => Owner::query()
+    ->when($search, fn ($q) => $q->where('name', 'like', "%{$search}%"))
+    ->get()
+    ->map(fn ($owner) => ['value' => $owner->id, 'label' => $owner->name])
+    ->all());
+
+DataFilter::options('projects', ProjectOptions::class);
+```
+
+A class name is resolved through the container only when its options are first asked for, so
+registering it costs nothing at boot.
+
+Then point a filter at it, for example `#[Filterable(Scope::class, scope: 'ownedBy', options: 'owners')]` on a property
+of the Filter Data class. Backed enums and booleans inline their options and need no source.
+
+## Reading it
+
+`DataFilter::resolveOptions('owners', $search)` runs the provider and returns its pairs; this is
+what an options endpoint in your application calls. An unregistered key throws an
+`InvalidArgumentException`. `DataFilter::hasOptions('owners')` checks first. The registry's own
+`resolve()` returns the provider itself, not its options.
+
+## Duplicates
+
+The policy is **supersede**: registering a taken key replaces its provider.
+
+## Related registries
+
+- [`data-filters.resources`](data-filters.resources): the resources whose filters reference these
+  sources.
+- [The data-filters registries](data-filters): how the two fit together.
+
+## Going deeper
+
+The source is
+[`OptionsRegistry`](https://github.com/stephenr85/laravel-data-filters/blob/main/src/Options/OptionsRegistry.php);
+the contract is
+[`OptionsSource`](https://github.com/stephenr85/laravel-data-filters/blob/main/src/Options/OptionsSource.php).
+The README's [UI parity section](https://github.com/stephenr85/laravel-data-filters#ui-parity) shows how
+`optionsRef` reaches the schema.

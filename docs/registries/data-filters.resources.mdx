@@ -1,0 +1,88 @@
+---
+title: Filterable resources
+segment: data-filters.resources
+nav_order: 100
+excerpt: One wiring per resource key (Filter Data class, Query class, model), filled from config, attributes or code.
+---
+
+# Filterable resources
+
+`data-filters.resources` maps a **resource key** to its wiring, a `ResourceDefinition` naming three
+classes: the Filter Data class whose attributes declare what can be filtered, sorted and included;
+the `ResourceQuery` subclass that scopes the base query and sets the default sort; and the Eloquent
+model. The key is how every part of the package finds the same resource: `DataFilter::query('asset')`
+for a list endpoint, a saved filter's stored resource, and the schema strategy that emits `x-filter`.
+
+{/* registry-facts:start — generated from the #[IsRegistry] declaration by `splicewire:beam:docs:registries:scaffold`. Rerun the command; do not edit between these markers. */}
+
+- **Root:** `data-filters.resources`
+- **Entries:** `Rushing\DataFilters\Registry\ResourceDefinition`
+- **Duplicate keys:** Supersede — a later registration under a taken key replaces the earlier entry, in its place
+- **Population:** Optional — an empty registry is normal
+- **Order:** `100` (display order, ascending)
+- **Declared by:** `Rushing\DataFilters\Registry\ResourceRegistry`
+
+{/* registry-facts:end */}
+
+## Three ways to register, weakest last
+
+A resource can arrive from three places, and they're ordered so the explicit ones win:
+
+1. **Config** seeds the registry. Entries in `config('data-filters.resources')` are read on first
+   access and win over discovery:
+
+   ```php
+   'resources' => [
+       'asset' => [
+           'data' => AssetFilterData::class,
+           'query' => AssetQuery::class,
+           'model' => Asset::class,
+       ],
+   ],
+   ```
+
+2. **Discovery** fills only the gaps. Put `#[ResourceFilter]` on a Filter Data class and list the
+   class or its directory under `config('data-filters.discover')`. Discovery runs at boot and never
+   overwrites a key that's already registered:
+
+   ```php
+   #[ResourceFilter(key: 'articles', query: ArticleQuery::class)]
+   class ArticleFilterData extends Data { … }
+   ```
+
+   The attribute is repeatable, which is how a legacy alias key works: a second declaration with
+   `resource: 'articles'` shares the canonical resource. A declaration with no `query:` registers
+   nothing, leaving another application to supply the Query class.
+
+3. **Code** has the last word. `DataFilter::resource('asset', [...])` registers unconditionally,
+   whenever it's called.
+
+When a definition leaves out `model`, the model is resolved lazily through the bound
+`ResourceModelResolver` the first time the resource is used.
+
+## Reading it
+
+`DataFilter::resource('asset')` returns the definition with its model resolved. On the registry
+itself, `get()` throws for an unknown key and `find()` returns `null`; `all()` lists every
+definition by key.
+
+## Duplicates
+
+The policy is **supersede**: a later registration under a taken key replaces the definition and
+keeps its position. The tier order above decides who registers last: discovery checks before it
+writes, and code doesn't.
+
+## Related registries
+
+- [`data-filters.options`](data-filters.options): the options sources a resource's relational
+  filters point at.
+- [The data-filters registries](data-filters): how the two fit together.
+
+## Going deeper
+
+The source is
+[`ResourceRegistry`](https://github.com/stephenr85/laravel-data-filters/blob/main/src/Registry/ResourceRegistry.php)
+and the attribute is
+[`ResourceFilter`](https://github.com/stephenr85/laravel-data-filters/blob/main/src/Attributes/ResourceFilter.php).
+The README covers [declaring a resource](https://github.com/stephenr85/laravel-data-filters#declaring-a-resource)
+and [wiring one](https://github.com/stephenr85/laravel-data-filters#wiring-a-resource).

@@ -1,0 +1,30 @@
+---
+title: The data-filters registries
+segment: data-filters
+nav_order: 20
+excerpt: Filterable resources and the options sources behind their relational controls.
+---
+
+# The data-filters registries
+
+[`rushing/laravel-data-filters`](https://github.com/stephenr85/laravel-data-filters) lets you declare
+a resource's filterable surface once, on a Spatie `Data` class, and derive the list query, the UI
+filter schema and saved filters from it. Two registries hold what your application wires in:
+
+- **Make a model filterable under a stable key** (`asset`, `articles`):
+  [`data-filters.resources`](data-filters.resources). Each entry names the Filter Data class, the
+  Query class and the model.
+- **Back a relational filter control with a searchable list of choices**:
+  [`data-filters.options`](data-filters.options). Each entry produces `{value, label}` pairs for one
+  `optionsRef`.
+
+They meet in the generated schema. A filter declared with `options: 'owners'` on a resource's Filter
+Data class surfaces as `optionsRef: 'owners'` in that resource's `x-filter` keyword, and your filter
+form fetches the choices from the options source registered under `owners`.
+
+Both **supersede** on a duplicate key, so a later registration replaces an earlier one.
+
+## Going deeper
+
+The [laravel-data-filters README](https://github.com/stephenr85/laravel-data-filters#readme) walks
+through declaring, wiring and applying a resource end to end.
