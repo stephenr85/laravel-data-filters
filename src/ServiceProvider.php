@@ -9,11 +9,20 @@ use Rushing\DataFilters\Registry\ResourceRegistry;
 use Rushing\DataFilters\SavedFilters\SavedFilter;
 use Rushing\DataFilters\Schema\FilterableAttributesStrategy;
 use Rushing\Popcorn\Registries\RegistryIndex;
+use Rushing\Popcorn\Registries\ScopesRegistrant;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class ServiceProvider extends PackageServiceProvider
 {
+    use ScopesRegistrant;
+
+    /** Every registry write in register()/boot() that names no `$by` records this package. */
+    protected function registrant(): string
+    {
+        return 'rushing/laravel-data-filters';
+    }
+
     public function configurePackage(Package $package): void
     {
         $package
