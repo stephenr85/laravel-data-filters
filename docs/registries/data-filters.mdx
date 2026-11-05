@@ -22,7 +22,8 @@ They meet in the generated schema. A filter declared with `options: 'owners'` on
 Data class surfaces as `optionsRef: 'owners'` in that resource's `x-filter` keyword, and your filter
 form fetches the choices from the options source registered under `owners`.
 
-Both **supersede** on a duplicate key, so a later registration replaces an earlier one.
+Both have the same [**duplicate-key policy**](/beam/docs/foundations/registries#key-policies),
+**supersede**, so a later registration replaces an earlier one.
 
 ## Going deeper
 

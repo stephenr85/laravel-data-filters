@@ -70,9 +70,10 @@ definition by key.
 
 ## Duplicates
 
-The policy is **supersede**: a later registration under a taken key replaces the definition and
-keeps its position. The tier order above decides who registers last: discovery checks before it
-writes, and code doesn't.
+The [**duplicate-key policy**](/beam/docs/foundations/registries#key-policies) is
+**supersede**: a later registration under a taken key replaces the definition and keeps its
+position. The tier order above decides who registers last: discovery checks before it writes, and
+code doesn't.
 
 ## Related registries
 
