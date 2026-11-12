@@ -7,6 +7,8 @@ use ReflectionEnum;
 use ReflectionNamedType;
 use ReflectionProperty;
 use Rushing\DataFilters\Contracts\FilterOperator;
+use Schemastud\DataSchemas\Contracts\ProvidesEnumLabel;
+use Schemastud\DataSchemas\Text\IdentitySchemaText;
 
 /**
  * Shared base for the shipped operators. Implements the `keyword()` mapping in
@@ -68,9 +70,16 @@ abstract class Operator implements FilterOperator
      */
     protected function inlineOptions(ReflectionProperty $property): ?array
     {
+        // localization 14: an enum option's label goes through laravel-data-schemas' enum-text hook, whose default is the
+        // enum's own label() when it provides one (else the case name, as before); a boolean option is an explicit key.
         if ($enum = $this->backedEnum($property)) {
+            $text = IdentitySchemaText::current();
+
             return array_map(
-                fn (BackedEnum $case) => ['value' => $case->value, 'label' => $case->name],
+                fn (BackedEnum $case) => [
+                    'value' => $case->value,
+                    'label' => $text->enumCaseLabel($case, $case instanceof ProvidesEnumLabel ? $case->label() : $case->name),
+                ],
                 $enum::cases(),
             );
         }
@@ -78,8 +87,8 @@ abstract class Operator implements FilterOperator
         $type = $property->getType();
         if ($type instanceof ReflectionNamedType && $type->getName() === 'bool') {
             return [
-                ['value' => true, 'label' => 'Yes'],
-                ['value' => false, 'label' => 'No'],
+                ['value' => true, 'label' => __('data-filters::options.boolean.true')],
+                ['value' => false, 'label' => __('data-filters::options.boolean.false')],
             ];
         }
 

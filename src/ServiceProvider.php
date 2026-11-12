@@ -53,6 +53,11 @@ class ServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
+        // localization 14: this package's own lines, under its translator namespace. The namespace is the composer
+        // name less its vendor and `laravel-` (`data-filters`), and the directory is `lang/`, the path beam's namespace
+        // allocator hints too (localization ruling 01 §3); package-tools' hasTranslations() would use resources/lang.
+        $this->loadTranslationsFrom(__DIR__.'/../lang', 'data-filters');
+
         $this->registerMorphAlias();
         $this->registerSchemaStrategy();
         $this->discoverResourceFilters();
